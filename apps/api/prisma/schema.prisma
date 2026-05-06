@@ -1,0 +1,142 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ── ENUMS ────────────────────────────────────────────────
+enum Role {
+  ADMIN
+  DOCTOR
+  OWNER
+}
+
+enum PlanType {
+  BASIC
+  PRO
+  ENTERPRISE
+}
+
+// ── ENTIDADES GLOBALES ────────────────────────────────────
+
+model User {
+  id           String       @id @default(uuid())
+  email        String       @unique
+  passwordHash String
+  firstName    String
+  lastName     String
+  phone        String?
+  avatarUrl    String?
+  isActive     Boolean      @default(true)
+  createdAt    DateTime     @default(now())
+  clinics      ClinicUser[]
+  pets         Pet[]
+}
+
+model Pet {
+  id        String         @id @default(uuid())
+  ownerId   String
+  name      String
+  species   String
+  breed     String?
+  birthDate DateTime?
+  sex       String
+  photoUrl  String?
+  createdAt DateTime       @default(now())
+  owner     User           @relation(fields: [ownerId], references: [id])
+  record    MedicalRecord?
+}
+
+model MedicalRecord {
+  id            String         @id @default(uuid())
+  petId         String         @unique
+  publicUuid    String         @unique @default(uuid())
+  qrCodeUrl     String?
+  isPublic      Boolean        @default(true)
+  createdAt     DateTime       @default(now())
+  pet           Pet            @relation(fields: [petId], references: [id])
+  consultations Consultation[]
+}
+
+model Consultation {
+  id            String         @id @default(uuid())
+  recordId      String
+  clinicId      String
+  doctorId      String
+  reason        String
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  record        MedicalRecord  @relation(fields: [recordId], references: [id])
+  note          MedicalNote?
+  prescriptions Prescription[]
+  vaccinations  Vaccination[]
+}
+
+// ── ENTIDADES DE TENANT ───────────────────────────────────
+
+model Clinic {
+  id         String       @id @default(uuid())
+  name       String
+  slug       String       @unique
+  licenseKey String       @unique
+  planType   PlanType     @default(BASIC)
+  logoUrl    String?
+  isActive   Boolean      @default(true)
+  createdAt  DateTime     @default(now())
+  users      ClinicUser[]
+}
+
+model ClinicUser {
+  id       String   @id @default(uuid())
+  clinicId String
+  userId   String
+  role     Role
+  isActive Boolean  @default(true)
+  joinedAt DateTime @default(now())
+  clinic   Clinic   @relation(fields: [clinicId], references: [id])
+  user     User     @relation(fields: [userId], references: [id])
+
+  @@unique([clinicId, userId])
+}
+
+model MedicalNote {
+  id             String       @id @default(uuid())
+  consultationId String       @unique
+  clinicId       String
+  authorId       String
+  title          String
+  content        String       @db.Text
+  attachmentUrl  String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  consultation   Consultation @relation(fields: [consultationId], references: [id])
+}
+
+model Prescription {
+  id             String       @id @default(uuid())
+  consultationId String
+  clinicId       String
+  doctorId       String
+  diagnosis      String
+  medications    String       @db.Text
+  instructions   String       @db.Text
+  validUntil     DateTime?
+  createdAt      DateTime     @default(now())
+  consultation   Consultation @relation(fields: [consultationId], references: [id])
+}
+
+model Vaccination {
+  id             String       @id @default(uuid())
+  consultationId String
+  clinicId       String
+  appliedBy      String
+  vaccineName    String
+  batch          String?
+  appliedAt      DateTime
+  nextDose       DateTime?
+  createdAt      DateTime     @default(now())
+  consultation   Consultation @relation(fields: [consultationId], references: [id])
+}
