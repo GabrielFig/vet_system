@@ -11,5 +11,5 @@
       "@vet/shared-types": ["../../packages/shared-types/src"]
     }
   },
-  "include": ["src", "prisma"]
+  "include": ["src"]
 }

@@ -1,9 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { useAuthStore } from '@/store/auth.store';
+import { useRequireAuth } from '@/hooks/use-require-auth';
 import { apiFetch } from '@/lib/api';
 import { MedicalRecordDetail, ConsultationSummary } from '@vet/shared-types';
 import { ConsultationTimeline } from '@/components/medical-records/consultation-timeline';
@@ -19,9 +19,8 @@ interface PetWithRecord {
 }
 
 export default function MedicalRecordPage() {
-  const router = useRouter();
   const { id: petId } = useParams<{ id: string }>();
-  const { user, accessToken, role } = useAuthStore();
+  const { user, accessToken, role, ready } = useRequireAuth();
   const [pet, setPet] = useState<PetWithRecord | null>(null);
   const [record, setRecord] = useState<MedicalRecordDetail | null>(null);
   const [showForm, setShowForm] = useState(false);
@@ -29,7 +28,7 @@ export default function MedicalRecordPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!user) { router.replace('/login'); return; }
+    if (!ready || !user) return;
     apiFetch<PetWithRecord>(`/pets/${petId}`, { token: accessToken ?? undefined })
       .then(async (p) => {
         setPet(p);
@@ -39,11 +38,11 @@ export default function MedicalRecordPage() {
         }
       })
       .finally(() => setLoading(false));
-  }, [user, petId, accessToken, router]);
+  }, [ready, user, petId, accessToken]);
 
   const canEdit = role === 'ADMIN' || role === 'DOCTOR';
 
-  if (!user || loading) return <div className="min-h-screen bg-slate-900 flex items-center justify-center text-slate-400">Cargando...</div>;
+  if (!ready || !user || loading) return <div className="min-h-screen bg-slate-900 flex items-center justify-center text-slate-400">Cargando...</div>;
   if (!pet || !record) return <div className="min-h-screen bg-slate-900 flex items-center justify-center text-red-400">No se encontró la cartilla</div>;
 
   function handleConsultationCreated(c: ConsultationSummary) {

@@ -1,18 +1,15 @@
 'use client';
 
-import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/auth.store';
+import { useRequireAuth } from '@/hooks/use-require-auth';
 
 export default function DashboardPage() {
   const router = useRouter();
-  const { user, clinic, role, clearAuth } = useAuthStore();
+  const { clinic, clearAuth } = useAuthStore();
+  const { user, role, ready } = useRequireAuth();
 
-  useEffect(() => {
-    if (!user) router.replace('/login');
-  }, [user, router]);
-
-  if (!user) return null;
+  if (!ready || !user) return <div className="min-h-screen bg-slate-900" />;
 
   return (
     <div className="min-h-screen bg-slate-900 text-white">

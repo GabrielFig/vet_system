@@ -1,9 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { useAuthStore } from '@/store/auth.store';
+import { useRequireAuth } from '@/hooks/use-require-auth';
 import { apiFetch } from '@/lib/api';
 
 interface PetDetail {
@@ -23,20 +23,19 @@ const SPECIES_EMOJI: Record<string, string> = {
 };
 
 export default function PetDetailPage() {
-  const router = useRouter();
   const { id } = useParams<{ id: string }>();
-  const { user, accessToken } = useAuthStore();
+  const { user, accessToken, ready } = useRequireAuth();
   const [pet, setPet] = useState<PetDetail | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!user) { router.replace('/login'); return; }
+    if (!ready || !user) return;
     apiFetch<PetDetail>(`/pets/${id}`, { token: accessToken ?? undefined })
       .then(setPet)
       .finally(() => setLoading(false));
-  }, [user, id, accessToken, router]);
+  }, [ready, user, id, accessToken]);
 
-  if (!user || loading) return <div className="min-h-screen bg-slate-900 flex items-center justify-center text-slate-400">Cargando...</div>;
+  if (!ready || !user || loading) return <div className="min-h-screen bg-slate-900 flex items-center justify-center text-slate-400">Cargando...</div>;
   if (!pet) return <div className="min-h-screen bg-slate-900 flex items-center justify-center text-red-400">Mascota no encontrada</div>;
 
   const age = pet.birthDate

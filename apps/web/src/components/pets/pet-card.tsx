@@ -24,7 +24,7 @@ export function PetCard({ pet }: { pet: PetSummary }) {
         <div className="flex-1 min-w-0">
           <div className="font-semibold text-white">{pet.name}</div>
           <div className="text-slate-400 text-sm truncate">
-            {pet.breed ?? pet.species} · {pet.sex === 'FEMALE' || pet.sex === 'female' ? 'Hembra' : 'Macho'} · {age}
+            {pet.breed ?? pet.species} · {(pet.sex as string) === 'FEMALE' || pet.sex === 'female' ? 'Hembra' : 'Macho'} · {age}
           </div>
           <div className="text-slate-500 text-xs mt-0.5">
             Dueño: {pet.owner.firstName} {pet.owner.lastName}

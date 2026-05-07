@@ -1,27 +1,25 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuthStore } from '@/store/auth.store';
+import { useRequireAuth } from '@/hooks/use-require-auth';
 import { apiFetch } from '@/lib/api';
 import { PetSummary } from '@vet/shared-types';
 import { PetCard } from '@/components/pets/pet-card';
 import { PetForm } from '@/components/pets/pet-form';
 
 export default function PetsPage() {
-  const router = useRouter();
-  const { user, accessToken } = useAuthStore();
+  const { user, accessToken, ready } = useRequireAuth();
   const [pets, setPets] = useState<PetSummary[]>([]);
   const [search, setSearch] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!user) { router.replace('/login'); return; }
+    if (!ready || !user) return;
     apiFetch<PetSummary[]>('/pets', { token: accessToken ?? undefined })
       .then(setPets)
       .finally(() => setLoading(false));
-  }, [user, accessToken, router]);
+  }, [ready, user, accessToken]);
 
   const filtered = pets.filter(
     (p) =>
@@ -30,7 +28,7 @@ export default function PetsPage() {
       `${p.owner.firstName} ${p.owner.lastName}`.toLowerCase().includes(search.toLowerCase()),
   );
 
-  if (!user) return null;
+  if (!ready || !user) return <div className="min-h-screen bg-slate-900" />;
 
   return (
     <div className="min-h-screen bg-slate-900 text-white">

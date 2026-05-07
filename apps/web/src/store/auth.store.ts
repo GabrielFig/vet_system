@@ -8,6 +8,7 @@ interface AuthState {
   user: AuthUser | null;
   clinic: AuthClinic | null;
   role: Role | null;
+  _hasHydrated: boolean;
   setAuth: (data: {
     accessToken: string;
     refreshToken: string;
@@ -17,6 +18,7 @@ interface AuthState {
   }) => void;
   clearAuth: () => void;
   updateAccessToken: (token: string) => void;
+  setHasHydrated: (v: boolean) => void;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -27,6 +29,7 @@ export const useAuthStore = create<AuthState>()(
       user: null,
       clinic: null,
       role: null,
+      _hasHydrated: false,
       setAuth: (data) =>
         set({
           accessToken: data.accessToken,
@@ -38,7 +41,13 @@ export const useAuthStore = create<AuthState>()(
       clearAuth: () =>
         set({ accessToken: null, refreshToken: null, user: null, clinic: null, role: null }),
       updateAccessToken: (token) => set({ accessToken: token }),
+      setHasHydrated: (v) => set({ _hasHydrated: v }),
     }),
-    { name: 'vet-auth' },
+    {
+      name: 'vet-auth',
+      onRehydrateStorage: () => (state) => {
+        state?.setHasHydrated(true);
+      },
+    },
   ),
 );
