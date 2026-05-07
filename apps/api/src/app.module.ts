@@ -12,6 +12,7 @@ import { MedicalRecordsModule } from './medical-records/medical-records.module';
 import { PublicModule } from './public/public.module';
 import { AppointmentsModule } from './appointments/appointments.module';
 import { InventoryModule } from './inventory/inventory.module';
+import { ReportsModule } from './reports/reports.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { InventoryModule } from './inventory/inventory.module';
     PublicModule,
     AppointmentsModule,
     InventoryModule,
+    ReportsModule,
   ],
   providers: [
     PrismaService,
