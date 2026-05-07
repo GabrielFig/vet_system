@@ -58,6 +58,26 @@ export default function MedicalRecordPage() {
         <span className="font-semibold">Cartilla médica</span>
         <div className="ml-auto flex gap-2">
           <button
+            onClick={async () => {
+              const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
+              const res = await fetch(`${API_URL}/pets/${petId}/record/pdf`, {
+                headers: { Authorization: `Bearer ${accessToken}` },
+              });
+              if (res.ok) {
+                const blob = await res.blob();
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `cartilla-${pet.name}.pdf`;
+                a.click();
+                URL.revokeObjectURL(url);
+              }
+            }}
+            className="text-xs bg-slate-700 hover:bg-slate-600 text-slate-300 px-3 py-1.5 rounded-lg transition-colors"
+          >
+            PDF
+          </button>
+          <button
             onClick={() => setShowQR(true)}
             className="text-xs bg-slate-700 hover:bg-slate-600 text-slate-300 px-3 py-1.5 rounded-lg transition-colors"
           >
