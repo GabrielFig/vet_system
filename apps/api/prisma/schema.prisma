@@ -82,10 +82,12 @@ model Consultation {
   clinicId      String
   doctorId      String
   reason        String
+  appointmentId String?        @unique
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
   record        MedicalRecord  @relation(fields: [recordId], references: [id])
   doctor        User           @relation("ConsultationDoctor", fields: [doctorId], references: [id])
+  appointment   Appointment?   @relation(fields: [appointmentId], references: [id])
   note          MedicalNote?
   prescriptions Prescription[]
   vaccinations  Vaccination[]
@@ -93,6 +95,7 @@ model Consultation {
   @@index([recordId])
   @@index([clinicId])
   @@index([doctorId])
+  @@index([appointmentId])
 }
 
 // ── ENTIDADES DE TENANT ───────────────────────────────────
@@ -219,6 +222,7 @@ model Appointment {
   updatedAt    DateTime          @updatedAt
   pet          Pet               @relation(fields: [petId], references: [id])
   doctor       User              @relation("AppointmentDoctor", fields: [doctorId], references: [id])
+  consultation Consultation?
   productsUsed StockMovement[]
 
   @@index([clinicId])

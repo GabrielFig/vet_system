@@ -115,6 +115,7 @@ export class AppointmentsService {
       include: {
         pet: { select: { id: true, name: true, species: true } },
         doctor: { select: { id: true, firstName: true, lastName: true } },
+        consultation: { select: { id: true } },
       },
     });
   }
@@ -237,5 +238,92 @@ export class AppointmentsService {
         user: { select: { firstName: true, lastName: true } },
       },
     });
+  }
+
+  async attendAppointment(
+    appointmentId: string,
+    clinicId: string,
+    doctorId: string,
+    dto: {
+      noteContent?: string;
+      noteTitle?: string;
+      prescriptions?: Array<{ diagnosis: string; medications: string; instructions: string }>;
+      vaccinations?: Array<{ vaccineName: string; batch?: string; appliedAt: string; nextDose?: string }>;
+    },
+  ) {
+    const appointment = await this.prisma.appointment.findFirst({
+      where: { id: appointmentId, clinicId },
+      include: {
+        pet: { select: { id: true, record: { select: { id: true } } } },
+        consultation: { select: { id: true } },
+      },
+    });
+    if (!appointment) throw new NotFoundException('Cita no encontrada');
+    if (appointment.status === AppointmentStatus.CANCELLED) {
+      throw new BadRequestException('No se puede atender una cita cancelada');
+    }
+    if (appointment.consultation) {
+      throw new ConflictException('Esta cita ya tiene una consulta registrada');
+    }
+
+    const record = appointment.pet.record ?? await this.prisma.medicalRecord.create({
+      data: { petId: appointment.petId },
+    });
+
+    const consultation = await this.prisma.consultation.create({
+      data: {
+        recordId: record.id,
+        clinicId,
+        doctorId,
+        reason: appointment.reason,
+        appointmentId,
+        note: dto.noteContent
+          ? {
+              create: {
+                clinicId,
+                authorId: doctorId,
+                title: dto.noteTitle || 'Nota de consulta',
+                content: dto.noteContent,
+              },
+            }
+          : undefined,
+        prescriptions: dto.prescriptions?.length
+          ? {
+              create: dto.prescriptions.map((p) => ({
+                clinicId,
+                doctorId,
+                diagnosis: p.diagnosis,
+                medications: p.medications,
+                instructions: p.instructions,
+              })),
+            }
+          : undefined,
+        vaccinations: dto.vaccinations?.length
+          ? {
+              create: dto.vaccinations.map((v) => ({
+                clinicId,
+                appliedById: doctorId,
+                vaccineName: v.vaccineName,
+                batch: v.batch,
+                appliedAt: new Date(v.appliedAt),
+                nextDose: v.nextDose ? new Date(v.nextDose) : null,
+              })),
+            }
+          : undefined,
+      },
+      include: {
+        note: true,
+        prescriptions: true,
+        vaccinations: true,
+        doctor: { select: { firstName: true, lastName: true } },
+      },
+    });
+
+    await this.prisma.appointment.update({
+      where: { id: appointmentId },
+      data: { status: AppointmentStatus.DONE },
+    });
+
+    return consultation;
   }
 }

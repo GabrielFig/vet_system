@@ -15,6 +15,7 @@ interface AppointmentDoc {
   notes: string | null;
   pet: { id: string; name: string; species: string };
   doctor: { id: string; firstName: string; lastName: string };
+  consultation: { id: string } | null;
 }
 
 function todayStr() {

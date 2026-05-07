@@ -84,4 +84,18 @@ export class AppointmentsController {
   ) {
     return this.service.getProductsUsed(appointmentId, user.clinicId);
   }
+
+  @Post(':id/attend')
+  attendAppointment(
+    @Param('id') appointmentId: string,
+    @Body() dto: {
+      noteContent?: string;
+      noteTitle?: string;
+      prescriptions?: Array<{ diagnosis: string; medications: string; instructions: string }>;
+      vaccinations?: Array<{ vaccineName: string; batch?: string; appliedAt: string; nextDose?: string }>;
+    },
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.service.attendAppointment(appointmentId, user.clinicId, user.sub, dto);
+  }
 }

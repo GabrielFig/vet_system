@@ -11,21 +11,24 @@ interface AppointmentDoc {
   notes: string | null;
   pet: { id: string; name: string; species: string };
   doctor: { id: string; firstName: string; lastName: string };
+  consultation: { id: string } | null;
 }
 
 interface Props {
   token: string | null;
   onSuccess: (a: AppointmentDoc) => void;
   onCancel: () => void;
+  initialPetId?: string;
+  initialPetName?: string;
 }
 
 const inputClass =
   'w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-vet-800 bg-white focus:outline-none focus:ring-2 focus:ring-vet-500 focus:border-transparent transition-all duration-200';
 const labelClass = 'block text-sm font-medium text-vet-800 mb-1';
 
-export function NewAppointmentForm({ token, onSuccess, onCancel }: Props) {
+export function NewAppointmentForm({ token, onSuccess, onCancel, initialPetId, initialPetName }: Props) {
   const [pets, setPets] = useState<Pet[]>([]);
-  const [petId, setPetId] = useState('');
+  const [petId, setPetId] = useState(initialPetId ?? '');
   const [date, setDate] = useState('');
   const [slots, setSlots] = useState<Slot[]>([]);
   const [slotIndex, setSlotIndex] = useState<number>(-1);
@@ -35,8 +38,10 @@ export function NewAppointmentForm({ token, onSuccess, onCancel }: Props) {
   const [loadingSlots, setLoadingSlots] = useState(false);
 
   useEffect(() => {
-    apiFetch<Pet[]>('/pets', { token: token ?? undefined }).then(setPets).catch(() => {});
-  }, [token]);
+    if (!initialPetId) {
+      apiFetch<Pet[]>('/pets', { token: token ?? undefined }).then(setPets).catch(() => {});
+    }
+  }, [token, initialPetId]);
 
   useEffect(() => {
     if (!date) { setSlots([]); return; }
@@ -76,10 +81,14 @@ export function NewAppointmentForm({ token, onSuccess, onCancel }: Props) {
 
       <div>
         <label className={labelClass}>Mascota *</label>
-        <select value={petId} onChange={(e) => setPetId(e.target.value)} required className={inputClass}>
-          <option value="">Seleccionar...</option>
-          {pets.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
-        </select>
+        {initialPetId ? (
+          <div className={`${inputClass} bg-vet-50 text-vet-700 cursor-default`}>{initialPetName ?? initialPetId}</div>
+        ) : (
+          <select value={petId} onChange={(e) => setPetId(e.target.value)} required className={inputClass}>
+            <option value="">Seleccionar...</option>
+            {pets.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+          </select>
+        )}
       </div>
 
       <div>

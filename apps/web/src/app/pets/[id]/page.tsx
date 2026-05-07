@@ -7,6 +7,7 @@ import { useRequireAuth } from '@/hooks/use-require-auth';
 import { apiFetch } from '@/lib/api';
 import { AppShell } from '@/components/layout/app-shell';
 import { Skeleton } from '@/components/ui/skeleton';
+import { NewAppointmentForm } from '@/components/appointments/new-appointment-form';
 
 interface PetDetail {
   id: string;
@@ -63,6 +64,7 @@ export default function PetDetailPage() {
   const { user, accessToken, ready } = useRequireAuth();
   const [pet, setPet] = useState<PetDetail | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showNewAppt, setShowNewAppt] = useState(false);
 
   useEffect(() => {
     if (!ready || !user) return;
@@ -143,15 +145,57 @@ export default function PetDetailPage() {
         </div>
       </div>
 
-      {/* Medical record link */}
-      {pet.record && (
-        <Link
-          href={`/pets/${pet.id}/record`}
+      {/* Action buttons */}
+      <div className="flex flex-col gap-3">
+        {/* Create appointment */}
+        <button
+          onClick={() => setShowNewAppt(true)}
           className="flex items-center justify-center gap-3 bg-vet-500 hover:bg-vet-600 active:scale-95 text-white font-semibold rounded-xl p-4 transition-all duration-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-vet-500 focus:ring-offset-2"
         >
-          <ClipboardIcon />
-          Ver cartilla médica
-        </Link>
+          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <rect width="18" height="18" x="3" y="4" rx="2" ry="2"/>
+            <line x1="16" x2="16" y1="2" y2="6"/>
+            <line x1="8" x2="8" y1="2" y2="6"/>
+            <line x1="3" x2="21" y1="10" y2="10"/>
+            <line x1="12" x2="12" y1="14" y2="18"/>
+            <line x1="10" x2="14" y1="16" y2="16"/>
+          </svg>
+          Crear cita
+        </button>
+
+        {/* Medical record link */}
+        {pet.record && (
+          <Link
+            href={`/pets/${pet.id}/record`}
+            className="flex items-center justify-center gap-3 bg-white hover:bg-vet-50 active:scale-95 text-vet-700 border border-vet-200 font-semibold rounded-xl p-4 transition-all duration-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-vet-500 focus:ring-offset-2"
+          >
+            <ClipboardIcon />
+            Ver cartilla médica
+          </Link>
+        )}
+      </div>
+
+      {/* New appointment modal */}
+      {showNewAppt && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-vet-100">
+              <h2 className="font-heading font-bold text-vet-800 text-lg">Nueva cita — {pet.name}</h2>
+              <button onClick={() => setShowNewAppt(false)} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 cursor-pointer transition-colors">
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            </div>
+            <div className="p-5">
+              <NewAppointmentForm
+                token={accessToken}
+                initialPetId={pet.id}
+                initialPetName={pet.name}
+                onSuccess={() => setShowNewAppt(false)}
+                onCancel={() => setShowNewAppt(false)}
+              />
+            </div>
+          </div>
+        </div>
       )}
     </AppShell>
   );
