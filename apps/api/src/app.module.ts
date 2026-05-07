@@ -11,6 +11,7 @@ import { PetsModule } from './pets/pets.module';
 import { MedicalRecordsModule } from './medical-records/medical-records.module';
 import { PublicModule } from './public/public.module';
 import { AppointmentsModule } from './appointments/appointments.module';
+import { InventoryModule } from './inventory/inventory.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { AppointmentsModule } from './appointments/appointments.module';
     MedicalRecordsModule,
     PublicModule,
     AppointmentsModule,
+    InventoryModule,
   ],
   providers: [
     PrismaService,
