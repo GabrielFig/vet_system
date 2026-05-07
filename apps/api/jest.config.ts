@@ -7,6 +7,6 @@ export default {
   coverageDirectory: '../coverage',
   testEnvironment: 'node',
   moduleNameMapper: {
-    '@vet/shared-types': '<rootDir>/../../packages/shared-types/src',
+    '@vet/shared-types': '<rootDir>/../../../packages/shared-types/src',
   },
 };
