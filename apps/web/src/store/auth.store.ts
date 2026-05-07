@@ -18,6 +18,7 @@ interface AuthState {
   }) => void;
   clearAuth: () => void;
   updateAccessToken: (token: string) => void;
+  updateTokens: (accessToken: string, refreshToken: string) => void;
   setHasHydrated: (v: boolean) => void;
 }
 
@@ -41,6 +42,7 @@ export const useAuthStore = create<AuthState>()(
       clearAuth: () =>
         set({ accessToken: null, refreshToken: null, user: null, clinic: null, role: null }),
       updateAccessToken: (token) => set({ accessToken: token }),
+      updateTokens: (accessToken, refreshToken) => set({ accessToken, refreshToken }),
       setHasHydrated: (v) => set({ _hasHydrated: v }),
     }),
     {
