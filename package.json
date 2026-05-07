@@ -4,8 +4,9 @@
   "private": true,
   "workspaces": ["apps/*", "packages/*"],
   "scripts": {
-    "dev:api": "npm run start:dev --workspace=apps/api",
-    "dev:web": "npm run dev --workspace=apps/web",
+    "build:packages": "npm run build --workspace=packages/shared-types --workspace=packages/utils",
+    "dev:api": "npm run build:packages && npm run start:dev --workspace=apps/api",
+    "dev:web": "npm run build:packages && npm run dev --workspace=apps/web",
     "build": "npm run build --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
     "db:migrate": "npm run prisma:migrate --workspace=apps/api",
