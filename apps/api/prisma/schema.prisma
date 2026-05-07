@@ -20,20 +20,29 @@ enum PlanType {
   ENTERPRISE
 }
 
+enum PetSex {
+  MALE
+  FEMALE
+}
+
 // ── ENTIDADES GLOBALES ────────────────────────────────────
 
 model User {
-  id           String       @id @default(uuid())
-  email        String       @unique
-  passwordHash String
-  firstName    String
-  lastName     String
-  phone        String?
-  avatarUrl    String?
-  isActive     Boolean      @default(true)
-  createdAt    DateTime     @default(now())
-  clinics      ClinicUser[]
-  pets         Pet[]
+  id                    String         @id @default(uuid())
+  email                 String         @unique
+  passwordHash          String
+  firstName             String
+  lastName              String
+  phone                 String?
+  avatarUrl             String?
+  isActive              Boolean        @default(true)
+  createdAt             DateTime       @default(now())
+  clinics               ClinicUser[]
+  pets                  Pet[]
+  consultationsAsDoctor Consultation[] @relation("ConsultationDoctor")
+  medicalNotesAuthored  MedicalNote[]  @relation("NoteAuthor")
+  prescriptionsIssued   Prescription[] @relation("PrescriptionDoctor")
+  vaccinationsApplied   Vaccination[]  @relation("VaccinationAppliedBy")
 }
 
 model Pet {
@@ -43,11 +52,14 @@ model Pet {
   species   String
   breed     String?
   birthDate DateTime?
-  sex       String
+  sex       PetSex
   photoUrl  String?
   createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
   owner     User           @relation(fields: [ownerId], references: [id])
   record    MedicalRecord?
+
+  @@index([ownerId])
 }
 
 model MedicalRecord {
@@ -70,9 +82,14 @@ model Consultation {
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
   record        MedicalRecord  @relation(fields: [recordId], references: [id])
+  doctor        User           @relation("ConsultationDoctor", fields: [doctorId], references: [id])
   note          MedicalNote?
   prescriptions Prescription[]
   vaccinations  Vaccination[]
+
+  @@index([recordId])
+  @@index([clinicId])
+  @@index([doctorId])
 }
 
 // ── ENTIDADES DE TENANT ───────────────────────────────────
@@ -86,6 +103,7 @@ model Clinic {
   logoUrl    String?
   isActive   Boolean      @default(true)
   createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
   users      ClinicUser[]
 }
 
@@ -100,6 +118,7 @@ model ClinicUser {
   user     User     @relation(fields: [userId], references: [id])
 
   @@unique([clinicId, userId])
+  @@index([userId])
 }
 
 model MedicalNote {
@@ -113,6 +132,7 @@ model MedicalNote {
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
   consultation   Consultation @relation(fields: [consultationId], references: [id])
+  author         User         @relation("NoteAuthor", fields: [authorId], references: [id])
 }
 
 model Prescription {
@@ -125,18 +145,28 @@ model Prescription {
   instructions   String       @db.Text
   validUntil     DateTime?
   createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
   consultation   Consultation @relation(fields: [consultationId], references: [id])
+  doctor         User         @relation("PrescriptionDoctor", fields: [doctorId], references: [id])
+
+  @@index([consultationId])
+  @@index([clinicId])
 }
 
 model Vaccination {
   id             String       @id @default(uuid())
   consultationId String
   clinicId       String
-  appliedBy      String
+  appliedById    String
   vaccineName    String
   batch          String?
   appliedAt      DateTime
   nextDose       DateTime?
   createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
   consultation   Consultation @relation(fields: [consultationId], references: [id])
+  appliedBy      User         @relation("VaccinationAppliedBy", fields: [appliedById], references: [id])
+
+  @@index([consultationId])
+  @@index([clinicId])
 }
