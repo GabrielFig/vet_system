@@ -6,3 +6,18 @@ dist/
 .next/
 .superpowers/
 uploads/
+
+# Compiled output from packages/shared-types (built in-place when transpilePackages is used)
+packages/*/src/*.js
+packages/*/src/*.js.map
+packages/*/src/*.d.ts
+packages/*/src/*.d.ts.map
+
+# Seed compiled output (ts-node compiles in place)
+apps/api/prisma/seed.js
+apps/api/prisma/seed.js.map
+apps/api/prisma/seed.d.ts
+apps/api/prisma/seed.d.ts.map
+
+# Next.js generated files
+apps/web/next-env.d.ts
