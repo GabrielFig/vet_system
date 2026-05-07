@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   ConflictException,
+  BadRequestException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
@@ -9,7 +10,7 @@ import { UpdateAppointmentDto, UpdateAppointmentStatusDto } from './dto/update-a
 import { QueryAppointmentsDto } from './dto/query-appointments.dto';
 import { UpdateScheduleDto } from './dto/update-schedule.dto';
 import { CreateExceptionDto } from './dto/create-exception.dto';
-import { AppointmentStatus } from '@prisma/client';
+import { AppointmentStatus, MovementType } from '@prisma/client';
 
 @Injectable()
 export class AppointmentsService {
@@ -162,6 +163,81 @@ export class AppointmentsService {
     return this.prisma.appointment.update({
       where: { id: appointmentId },
       data: { status: dto.status },
+    });
+  }
+
+  async addProductUsed(
+    appointmentId: string,
+    dto: { productId: string; quantity: number; notes?: string },
+    userId: string,
+    clinicId: string,
+  ): Promise<{ movement: { type: string; quantity: number }; currentStock: number }> {
+    // Verify appointment belongs to this clinic and is not cancelled
+    const appointment = await this.prisma.appointment.findFirst({
+      where: { id: appointmentId, clinicId },
+    });
+    if (!appointment) throw new NotFoundException('Cita no encontrada');
+    if (appointment.status === AppointmentStatus.CANCELLED) {
+      throw new BadRequestException('No se pueden registrar materiales en una cita cancelada');
+    }
+
+    // Delegate to inventory logic with pessimistic locking
+    return this.prisma.$transaction(async (tx) => {
+      const rows = await tx.$queryRaw<
+        Array<{ id: string; currentStock: number; isActive: boolean }>
+      >`
+        SELECT id, "currentStock", "isActive"
+        FROM "Product"
+        WHERE id = ${dto.productId}::uuid
+          AND "clinicId" = ${clinicId}::uuid
+          AND "isActive" = true
+        FOR UPDATE
+      `;
+
+      if (rows.length === 0) throw new NotFoundException('Producto no encontrado');
+      const product = rows[0];
+
+      const newStock = product.currentStock - dto.quantity;
+      if (newStock < 0) {
+        throw new BadRequestException(
+          `Stock insuficiente. Disponible: ${product.currentStock}, solicitado: ${dto.quantity}`,
+        );
+      }
+
+      await tx.stockMovement.create({
+        data: {
+          productId: dto.productId,
+          clinicId,
+          userId,
+          type: MovementType.OUT,
+          quantity: dto.quantity,
+          notes: dto.notes,
+          appointmentId,
+        },
+      });
+
+      const updated = await tx.product.update({
+        where: { id: dto.productId },
+        data: { currentStock: newStock },
+      });
+
+      return { movement: { type: 'OUT', quantity: dto.quantity }, currentStock: updated.currentStock };
+    });
+  }
+
+  async getProductsUsed(appointmentId: string, clinicId: string) {
+    const appointment = await this.prisma.appointment.findFirst({
+      where: { id: appointmentId, clinicId },
+    });
+    if (!appointment) throw new NotFoundException('Cita no encontrada');
+
+    return this.prisma.stockMovement.findMany({
+      where: { appointmentId, clinicId },
+      orderBy: { createdAt: 'asc' },
+      include: {
+        product: { select: { id: true, name: true, unit: true, category: true } },
+        user: { select: { firstName: true, lastName: true } },
+      },
     });
   }
 }

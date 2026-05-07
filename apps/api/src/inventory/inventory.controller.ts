@@ -46,10 +46,10 @@ export class InventoryController {
   @Post('products/:id/movements')
   createMovement(
     @Param('id') id: string,
-    @Body() dto: CreateMovementDto,
+    @Body() dto: CreateMovementDto & { appointmentId?: string },
     @CurrentUser() user: JwtPayload,
   ) {
-    return this.service.createMovement(id, dto, user.sub, user.clinicId);
+    return this.service.createMovement(id, dto, user.sub, user.clinicId, dto.appointmentId);
   }
 
   @Get('inventory/low-stock')

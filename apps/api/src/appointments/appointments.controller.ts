@@ -67,4 +67,21 @@ export class AppointmentsController {
   updateStatus(@Param('id') id: string, @Body() dto: UpdateAppointmentStatusDto, @CurrentUser() user: JwtPayload) {
     return this.service.updateStatus(id, dto, user.clinicId);
   }
+
+  @Post(':id/products-used')
+  addProductUsed(
+    @Param('id') appointmentId: string,
+    @Body() dto: { productId: string; quantity: number; notes?: string },
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.service.addProductUsed(appointmentId, dto, user.sub, user.clinicId);
+  }
+
+  @Get(':id/products-used')
+  getProductsUsed(
+    @Param('id') appointmentId: string,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.service.getProductsUsed(appointmentId, user.clinicId);
+  }
 }

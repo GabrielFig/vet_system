@@ -18,6 +18,38 @@ const inputClass =
   'w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-vet-800 bg-white focus:outline-none focus:ring-2 focus:ring-vet-500 focus:border-transparent transition-all duration-200';
 const labelClass = 'block text-sm font-medium text-vet-800 mb-1';
 
+const VET_CATEGORIES = [
+  'Vacunas',
+  'Medicamentos',
+  'Antiparasitarios',
+  'Material quirúrgico',
+  'Vendajes y apósitos',
+  'Desinfectantes',
+  'Suplementos',
+  'Anestésicos',
+  'Material de diagnóstico',
+  'Alimentos y suplementos',
+  'Equipos',
+  'Otros',
+];
+
+const VET_UNITS = [
+  'piezas',
+  'ml',
+  'mg',
+  'g',
+  'kg',
+  'L',
+  'dosis',
+  'caja',
+  'frasco',
+  'ampolleta',
+  'tubo',
+  'sobre',
+  'rollo',
+  'paquete',
+];
+
 export function ProductForm({ token, onSuccess, onCancel }: Props) {
   const [name, setName] = useState('');
   const [sku, setSku] = useState('');
@@ -69,11 +101,20 @@ export function ProductForm({ token, onSuccess, onCancel }: Props) {
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className={labelClass}>Categoría *</label>
-          <input value={category} onChange={(e) => setCategory(e.target.value)} required className={inputClass} />
+          <select value={category} onChange={(e) => setCategory(e.target.value)} required className={inputClass}>
+            <option value="">Selecciona una categoría...</option>
+            {VET_CATEGORIES.map((c) => (
+              <option key={c} value={c}>{c}</option>
+            ))}
+          </select>
         </div>
         <div>
           <label className={labelClass}>Unidad *</label>
-          <input value={unit} onChange={(e) => setUnit(e.target.value)} required className={inputClass} />
+          <select value={unit} onChange={(e) => setUnit(e.target.value)} required className={inputClass}>
+            {VET_UNITS.map((u) => (
+              <option key={u} value={u}>{u}</option>
+            ))}
+          </select>
         </div>
       </div>
 

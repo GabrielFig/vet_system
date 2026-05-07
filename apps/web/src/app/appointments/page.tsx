@@ -126,7 +126,7 @@ export default function AppointmentsPage() {
       ) : (
         <div className="space-y-3">
           {appointments.map((a) => (
-            <AppointmentCard key={a.id} appointment={a} onStatusChange={handleStatusChange} canAdmin={canAdmin} />
+            <AppointmentCard key={a.id} appointment={a} onStatusChange={handleStatusChange} canAdmin={canAdmin} token={accessToken} />
           ))}
         </div>
       )}

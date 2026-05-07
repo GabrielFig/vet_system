@@ -206,19 +206,20 @@ model ScheduleException {
 }
 
 model Appointment {
-  id        String            @id @default(uuid())
-  clinicId  String
-  petId     String
-  doctorId  String
-  startsAt  DateTime
-  endsAt    DateTime
-  reason    String
-  status    AppointmentStatus @default(PENDING)
-  notes     String?
-  createdAt DateTime          @default(now())
-  updatedAt DateTime          @updatedAt
-  pet       Pet               @relation(fields: [petId], references: [id])
-  doctor    User              @relation("AppointmentDoctor", fields: [doctorId], references: [id])
+  id           String            @id @default(uuid())
+  clinicId     String
+  petId        String
+  doctorId     String
+  startsAt     DateTime
+  endsAt       DateTime
+  reason       String
+  status       AppointmentStatus @default(PENDING)
+  notes        String?
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+  pet          Pet               @relation(fields: [petId], references: [id])
+  doctor       User              @relation("AppointmentDoctor", fields: [doctorId], references: [id])
+  productsUsed StockMovement[]
 
   @@index([clinicId])
   @@index([petId])
@@ -255,17 +256,20 @@ model Product {
 }
 
 model StockMovement {
-  id        String       @id @default(uuid())
-  productId String
-  clinicId  String
-  userId    String
-  type      MovementType
-  quantity  Int
-  notes     String?
-  createdAt DateTime     @default(now())
-  product   Product      @relation(fields: [productId], references: [id])
-  user      User         @relation("StockMovementUser", fields: [userId], references: [id])
+  id            String       @id @default(uuid())
+  productId     String
+  clinicId      String
+  userId        String
+  type          MovementType
+  quantity      Int
+  notes         String?
+  appointmentId String?
+  createdAt     DateTime     @default(now())
+  product       Product      @relation(fields: [productId], references: [id])
+  user          User         @relation("StockMovementUser", fields: [userId], references: [id])
+  appointment   Appointment? @relation(fields: [appointmentId], references: [id])
 
   @@index([productId])
   @@index([clinicId])
+  @@index([appointmentId])
 }

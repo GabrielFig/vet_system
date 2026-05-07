@@ -48,31 +48,67 @@ export class InventoryService {
     const product = await this.prisma.product.findFirst({ where: { id: productId, clinicId } });
     if (!product) throw new NotFoundException('Producto no encontrado');
     return this.prisma.stockMovement.findMany({
-      where: { productId },
+      where: { productId, clinicId },
       orderBy: { createdAt: 'desc' },
-      include: { user: { select: { firstName: true, lastName: true } } },
+      include: {
+        user: { select: { firstName: true, lastName: true } },
+        appointment: { select: { id: true, startsAt: true, reason: true } },
+      },
     });
   }
 
   async createMovement(
     productId: string,
-    dto: CreateMovementDto,
+    dto: { type: string; quantity: number; notes?: string },
     userId: string,
     clinicId: string,
-  ) {
+    appointmentId?: string,
+  ): Promise<{ movement: { type: string; quantity: number }; currentStock: number }> {
     return this.prisma.$transaction(async (tx) => {
-      const product = await tx.product.findFirst({ where: { id: productId, clinicId, isActive: true } });
-      if (!product) throw new NotFoundException('Producto no encontrado');
+      // Pessimistic lock: prevents race conditions when multiple doctors
+      // use the same product simultaneously. The FOR UPDATE lock ensures
+      // only one transaction can modify this row at a time.
+      const rows = await tx.$queryRaw<
+        Array<{ id: string; currentStock: number; minStock: number; isActive: boolean; clinicId: string }>
+      >`
+        SELECT id, "currentStock", "minStock", "isActive", "clinicId"
+        FROM "Product"
+        WHERE id = ${productId}::uuid
+          AND "clinicId" = ${clinicId}::uuid
+          AND "isActive" = true
+        FOR UPDATE
+      `;
+
+      if (rows.length === 0) {
+        throw new NotFoundException('Producto no encontrado');
+      }
+      const product = rows[0];
 
       let newStock: number;
-      if (dto.type === 'IN') newStock = product.currentStock + dto.quantity;
-      else if (dto.type === 'OUT') newStock = product.currentStock - dto.quantity;
-      else newStock = dto.quantity; // ADJUSTMENT
-
-      if (newStock < 0) throw new BadRequestException('Stock insuficiente para registrar esta salida');
+      if (dto.type === 'IN') {
+        newStock = product.currentStock + dto.quantity;
+      } else if (dto.type === 'OUT') {
+        newStock = product.currentStock - dto.quantity;
+        if (newStock < 0) {
+          throw new BadRequestException(
+            `Stock insuficiente. Disponible: ${product.currentStock}, solicitado: ${dto.quantity}`,
+          );
+        }
+      } else {
+        // ADJUSTMENT
+        newStock = dto.quantity;
+      }
 
       await tx.stockMovement.create({
-        data: { productId, clinicId, userId, type: dto.type as MovementType, quantity: dto.quantity, notes: dto.notes },
+        data: {
+          productId,
+          clinicId,
+          userId,
+          type: dto.type as MovementType,
+          quantity: dto.quantity,
+          notes: dto.notes,
+          ...(appointmentId ? { appointmentId } : {}),
+        },
       });
 
       const updated = await tx.product.update({
