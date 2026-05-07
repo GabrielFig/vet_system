@@ -10,13 +10,17 @@ const FONTS = {
   },
 };
 
-function buildPdfBuffer(docDefinition: object): Promise<Buffer> {
+async function buildPdfBuffer(docDefinition: object): Promise<Buffer> {
   // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const PdfPrinter = require('pdfmake') as new (fonts: object) => {
-    createPdfKitDocument: (dd: object) => NodeJS.EventEmitter & { end: () => void };
+  const { default: PdfPrinter } = require('pdfmake/js/Printer') as {
+    default: new (fonts: object, vfs: unknown, urlResolver: object, localPolicy: unknown) => {
+      createPdfKitDocument: (dd: object) => Promise<NodeJS.EventEmitter & { end: () => void }>;
+    };
   };
-  const printer = new PdfPrinter(FONTS);
-  const pdfDoc = printer.createPdfKitDocument(docDefinition);
+  // pdfmake v0.3 requires a urlResolver with resolve() + resolved() — no-op is fine for built-in fonts
+  const urlResolver = { resolve: () => {}, resolved: async () => {} };
+  const printer = new PdfPrinter(FONTS, undefined, urlResolver, undefined);
+  const pdfDoc = await printer.createPdfKitDocument(docDefinition);
   return new Promise((resolve, reject) => {
     const chunks: Buffer[] = [];
     pdfDoc.on('data', (chunk: Buffer) => chunks.push(chunk));
