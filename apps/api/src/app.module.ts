@@ -10,6 +10,7 @@ import { AuthModule } from './auth/auth.module';
 import { PetsModule } from './pets/pets.module';
 import { MedicalRecordsModule } from './medical-records/medical-records.module';
 import { PublicModule } from './public/public.module';
+import { AppointmentsModule } from './appointments/appointments.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { PublicModule } from './public/public.module';
     PetsModule,
     MedicalRecordsModule,
     PublicModule,
+    AppointmentsModule,
   ],
   providers: [
     PrismaService,
