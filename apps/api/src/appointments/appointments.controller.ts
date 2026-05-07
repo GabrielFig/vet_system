@@ -36,17 +36,16 @@ export class AppointmentsController {
   @Roles(Role.ADMIN)
   @Delete('schedule/exceptions/:exId')
   @HttpCode(HttpStatus.NO_CONTENT)
-  deleteException(@Param('exId') exId: string) {
-    return this.service.deleteException(exId);
+  deleteException(@Param('exId') exId: string, @CurrentUser() user: JwtPayload) {
+    return this.service.deleteException(exId, user.clinicId);
   }
 
   @Get('available-slots')
   getAvailableSlots(
-    @Query('clinicId') clinicId: string,
     @Query('date') date: string,
     @CurrentUser() user: JwtPayload,
   ) {
-    return this.service.getAvailableSlots(clinicId ?? user.clinicId, date);
+    return this.service.getAvailableSlots(user.clinicId, date);
   }
 
   @Get()
@@ -60,12 +59,12 @@ export class AppointmentsController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() dto: UpdateAppointmentDto) {
-    return this.service.update(id, dto);
+  update(@Param('id') id: string, @Body() dto: UpdateAppointmentDto, @CurrentUser() user: JwtPayload) {
+    return this.service.update(id, dto, user.clinicId);
   }
 
   @Patch(':id/status')
-  updateStatus(@Param('id') id: string, @Body() dto: UpdateAppointmentStatusDto) {
-    return this.service.updateStatus(id, dto);
+  updateStatus(@Param('id') id: string, @Body() dto: UpdateAppointmentStatusDto, @CurrentUser() user: JwtPayload) {
+    return this.service.updateStatus(id, dto, user.clinicId);
   }
 }

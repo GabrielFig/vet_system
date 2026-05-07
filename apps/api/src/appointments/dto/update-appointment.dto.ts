@@ -1,4 +1,5 @@
 import { IsString, IsOptional, IsEnum } from 'class-validator';
+import { AppointmentStatus } from '@prisma/client';
 
 export class UpdateAppointmentDto {
   @IsOptional()
@@ -15,6 +16,6 @@ export class UpdateAppointmentDto {
 }
 
 export class UpdateAppointmentStatusDto {
-  @IsEnum(['PENDING', 'CONFIRMED', 'CANCELLED', 'DONE'])
-  status: string;
+  @IsEnum(AppointmentStatus)
+  status: AppointmentStatus;
 }

@@ -40,7 +40,9 @@ export class AppointmentsService {
     });
   }
 
-  async deleteException(exceptionId: string) {
+  async deleteException(exceptionId: string, clinicId: string) {
+    const exc = await this.prisma.scheduleException.findFirst({ where: { id: exceptionId, clinicId } });
+    if (!exc) throw new NotFoundException('Excepción no encontrada');
     return this.prisma.scheduleException.delete({ where: { id: exceptionId } });
   }
 
@@ -145,8 +147,8 @@ export class AppointmentsService {
     });
   }
 
-  async update(appointmentId: string, dto: UpdateAppointmentDto) {
-    const appt = await this.prisma.appointment.findUnique({ where: { id: appointmentId } });
+  async update(appointmentId: string, dto: UpdateAppointmentDto, clinicId: string) {
+    const appt = await this.prisma.appointment.findFirst({ where: { id: appointmentId, clinicId } });
     if (!appt) throw new NotFoundException('Cita no encontrada');
     return this.prisma.appointment.update({
       where: { id: appointmentId },
@@ -154,12 +156,12 @@ export class AppointmentsService {
     });
   }
 
-  async updateStatus(appointmentId: string, dto: UpdateAppointmentStatusDto) {
-    const appt = await this.prisma.appointment.findUnique({ where: { id: appointmentId } });
+  async updateStatus(appointmentId: string, dto: UpdateAppointmentStatusDto, clinicId: string) {
+    const appt = await this.prisma.appointment.findFirst({ where: { id: appointmentId, clinicId } });
     if (!appt) throw new NotFoundException('Cita no encontrada');
     return this.prisma.appointment.update({
       where: { id: appointmentId },
-      data: { status: dto.status as AppointmentStatus },
+      data: { status: dto.status },
     });
   }
 }
