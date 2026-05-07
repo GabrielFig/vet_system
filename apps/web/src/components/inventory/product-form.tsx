@@ -14,6 +14,10 @@ interface Props {
   onCancel: () => void;
 }
 
+const inputClass =
+  'w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-vet-800 bg-white focus:outline-none focus:ring-2 focus:ring-vet-500 focus:border-transparent transition-all duration-200';
+const labelClass = 'block text-sm font-medium text-vet-800 mb-1';
+
 export function ProductForm({ token, onSuccess, onCancel }: Props) {
   const [name, setName] = useState('');
   const [sku, setSku] = useState('');
@@ -45,59 +49,62 @@ export function ProductForm({ token, onSuccess, onCancel }: Props) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      {error && <div className="bg-red-500/10 border border-red-500 text-red-400 text-sm rounded-lg p-3">{error}</div>}
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg p-3">
+          {error}
+        </div>
+      )}
 
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="block text-slate-300 text-sm mb-1">Nombre *</label>
-          <input value={name} onChange={(e) => setName(e.target.value)} required
-            className="w-full bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500" />
+          <label className={labelClass}>Nombre *</label>
+          <input value={name} onChange={(e) => setName(e.target.value)} required className={inputClass} />
         </div>
         <div>
-          <label className="block text-slate-300 text-sm mb-1">SKU *</label>
-          <input value={sku} onChange={(e) => setSku(e.target.value)} required
-            className="w-full bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500" />
+          <label className={labelClass}>SKU *</label>
+          <input value={sku} onChange={(e) => setSku(e.target.value)} required className={inputClass} />
         </div>
       </div>
 
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="block text-slate-300 text-sm mb-1">Categoría *</label>
-          <input value={category} onChange={(e) => setCategory(e.target.value)} required
-            className="w-full bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500" />
+          <label className={labelClass}>Categoría *</label>
+          <input value={category} onChange={(e) => setCategory(e.target.value)} required className={inputClass} />
         </div>
         <div>
-          <label className="block text-slate-300 text-sm mb-1">Unidad *</label>
-          <input value={unit} onChange={(e) => setUnit(e.target.value)} required
-            className="w-full bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500" />
+          <label className={labelClass}>Unidad *</label>
+          <input value={unit} onChange={(e) => setUnit(e.target.value)} required className={inputClass} />
         </div>
       </div>
 
       <div className="grid grid-cols-3 gap-3">
         <div>
-          <label className="block text-slate-300 text-sm mb-1">Stock mínimo</label>
-          <input type="number" value={minStock} onChange={(e) => setMinStock(e.target.value)} min="0"
-            className="w-full bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500" />
+          <label className={labelClass}>Stock mínimo</label>
+          <input type="number" value={minStock} onChange={(e) => setMinStock(e.target.value)} min="0" className={inputClass} />
         </div>
         <div>
-          <label className="block text-slate-300 text-sm mb-1">Precio costo *</label>
-          <input type="number" value={costPrice} onChange={(e) => setCostPrice(e.target.value)} required min="0" step="0.01"
-            className="w-full bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500" />
+          <label className={labelClass}>Precio costo *</label>
+          <input type="number" value={costPrice} onChange={(e) => setCostPrice(e.target.value)} required min="0" step="0.01" className={inputClass} />
         </div>
         <div>
-          <label className="block text-slate-300 text-sm mb-1">Precio venta *</label>
-          <input type="number" value={salePrice} onChange={(e) => setSalePrice(e.target.value)} required min="0" step="0.01"
-            className="w-full bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500" />
+          <label className={labelClass}>Precio venta *</label>
+          <input type="number" value={salePrice} onChange={(e) => setSalePrice(e.target.value)} required min="0" step="0.01" className={inputClass} />
         </div>
       </div>
 
-      <div className="flex gap-3">
-        <button type="button" onClick={onCancel}
-          className="flex-1 bg-slate-700 hover:bg-slate-600 text-white rounded-lg py-2 text-sm transition-colors">
+      <div className="flex gap-3 pt-2">
+        <button
+          type="button"
+          onClick={onCancel}
+          className="flex-1 bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 rounded-lg py-2.5 text-sm font-medium transition-all duration-200 cursor-pointer active:scale-95 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-2"
+        >
           Cancelar
         </button>
-        <button type="submit" disabled={loading}
-          className="flex-1 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-semibold rounded-lg py-2 text-sm transition-colors">
+        <button
+          type="submit"
+          disabled={loading}
+          className="flex-1 bg-vet-500 hover:bg-vet-600 disabled:opacity-50 text-white font-semibold rounded-lg py-2.5 text-sm transition-all duration-200 cursor-pointer active:scale-95 disabled:active:scale-100 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-vet-500 focus:ring-offset-2"
+        >
           {loading ? 'Guardando...' : 'Crear producto'}
         </button>
       </div>

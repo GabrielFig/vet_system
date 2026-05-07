@@ -19,6 +19,10 @@ interface Props {
   onCancel: () => void;
 }
 
+const inputClass =
+  'w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-vet-800 bg-white focus:outline-none focus:ring-2 focus:ring-vet-500 focus:border-transparent transition-all duration-200';
+const labelClass = 'block text-sm font-medium text-vet-800 mb-1';
+
 export function NewAppointmentForm({ token, onSuccess, onCancel }: Props) {
   const [pets, setPets] = useState<Pet[]>([]);
   const [petId, setPetId] = useState('');
@@ -45,7 +49,7 @@ export function NewAppointmentForm({ token, onSuccess, onCancel }: Props) {
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    if (slotIndex < 0) { setError('Selecciona un slot'); return; }
+    if (slotIndex < 0) { setError('Selecciona un horario'); return; }
     setError('');
     setLoading(true);
     try {
@@ -64,37 +68,53 @@ export function NewAppointmentForm({ token, onSuccess, onCancel }: Props) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      {error && <div className="bg-red-500/10 border border-red-500 text-red-400 text-sm rounded-lg p-3">{error}</div>}
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg p-3">
+          {error}
+        </div>
+      )}
 
       <div>
-        <label className="block text-slate-300 text-sm mb-1">Mascota *</label>
-        <select value={petId} onChange={(e) => setPetId(e.target.value)} required
-          className="w-full bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500">
+        <label className={labelClass}>Mascota *</label>
+        <select value={petId} onChange={(e) => setPetId(e.target.value)} required className={inputClass}>
           <option value="">Seleccionar...</option>
           {pets.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
         </select>
       </div>
 
       <div>
-        <label className="block text-slate-300 text-sm mb-1">Fecha *</label>
-        <input type="date" value={date} onChange={(e) => { setDate(e.target.value); setSlotIndex(-1); }} required
-          className="w-full bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500" />
+        <label className={labelClass}>Fecha *</label>
+        <input
+          type="date"
+          value={date}
+          onChange={(e) => { setDate(e.target.value); setSlotIndex(-1); }}
+          required
+          className={inputClass}
+        />
       </div>
 
       {date && (
         <div>
-          <label className="block text-slate-300 text-sm mb-1">Horario *</label>
+          <label className={labelClass}>Horario *</label>
           {loadingSlots ? (
-            <p className="text-slate-400 text-sm">Cargando slots...</p>
+            <p className="text-gray-400 text-sm">Cargando horarios disponibles...</p>
           ) : slots.length === 0 ? (
-            <p className="text-slate-400 text-sm">No hay slots disponibles para este día</p>
+            <p className="text-gray-400 text-sm">No hay horarios disponibles para este día</p>
           ) : (
             <div className="grid grid-cols-4 gap-2">
               {slots.map((s, i) => {
                 const time = new Date(s.startsAt).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
                 return (
-                  <button key={i} type="button" onClick={() => setSlotIndex(i)}
-                    className={`py-2 rounded-lg text-sm font-medium transition-colors ${slotIndex === i ? 'bg-indigo-600 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}>
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => setSlotIndex(i)}
+                    className={`py-2 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer active:scale-95 ${
+                      slotIndex === i
+                        ? 'bg-vet-500 text-white'
+                        : 'bg-vet-50 text-vet-600 border border-vet-100 hover:bg-vet-100 hover:border-vet-200'
+                    }`}
+                  >
                     {time}
                   </button>
                 );
@@ -105,19 +125,29 @@ export function NewAppointmentForm({ token, onSuccess, onCancel }: Props) {
       )}
 
       <div>
-        <label className="block text-slate-300 text-sm mb-1">Motivo *</label>
-        <input value={reason} onChange={(e) => setReason(e.target.value)} required
-          className="w-full bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500"
-          placeholder="Revisión general, vacunación..." />
+        <label className={labelClass}>Motivo *</label>
+        <input
+          value={reason}
+          onChange={(e) => setReason(e.target.value)}
+          required
+          placeholder="Revisión general, vacunación..."
+          className={inputClass}
+        />
       </div>
 
-      <div className="flex gap-3">
-        <button type="button" onClick={onCancel}
-          className="flex-1 bg-slate-700 hover:bg-slate-600 text-white rounded-lg py-2 text-sm transition-colors">
+      <div className="flex gap-3 pt-2">
+        <button
+          type="button"
+          onClick={onCancel}
+          className="flex-1 bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 rounded-lg py-2.5 text-sm font-medium transition-all duration-200 cursor-pointer active:scale-95 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-2"
+        >
           Cancelar
         </button>
-        <button type="submit" disabled={loading}
-          className="flex-1 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-semibold rounded-lg py-2 text-sm transition-colors">
+        <button
+          type="submit"
+          disabled={loading}
+          className="flex-1 bg-vet-500 hover:bg-vet-600 disabled:opacity-50 text-white font-semibold rounded-lg py-2.5 text-sm transition-all duration-200 cursor-pointer active:scale-95 disabled:active:scale-100 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-vet-500 focus:ring-offset-2"
+        >
           {loading ? 'Guardando...' : 'Crear cita'}
         </button>
       </div>

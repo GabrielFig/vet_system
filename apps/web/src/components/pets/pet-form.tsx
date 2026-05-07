@@ -10,6 +10,10 @@ interface PetFormProps {
   onCancel: () => void;
 }
 
+const inputClass =
+  'w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-vet-800 bg-white focus:outline-none focus:ring-2 focus:ring-vet-500 focus:border-transparent transition-all duration-200';
+const labelClass = 'block text-sm font-medium text-vet-800 mb-1';
+
 export function PetForm({ onSuccess, onCancel }: PetFormProps) {
   const token = useAuthStore((s) => s.accessToken);
   const [name, setName] = useState('');
@@ -40,19 +44,27 @@ export function PetForm({ onSuccess, onCancel }: PetFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      {error && <div className="bg-red-500/10 border border-red-500 text-red-400 text-sm rounded-lg p-3">{error}</div>}
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg p-3">
+          {error}
+        </div>
+      )}
 
       <div>
-        <label className="block text-slate-300 text-sm mb-1">Nombre *</label>
-        <input value={name} onChange={(e) => setName(e.target.value)} required
-          className="w-full bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500" />
+        <label className={labelClass}>Nombre *</label>
+        <input
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          required
+          placeholder="Nombre de la mascota"
+          className={inputClass}
+        />
       </div>
 
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="block text-slate-300 text-sm mb-1">Especie *</label>
-          <select value={species} onChange={(e) => setSpecies(e.target.value)}
-            className="w-full bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500">
+          <label className={labelClass}>Especie *</label>
+          <select value={species} onChange={(e) => setSpecies(e.target.value)} className={inputClass}>
             <option value="dog">Perro</option>
             <option value="cat">Gato</option>
             <option value="bird">Ave</option>
@@ -61,9 +73,8 @@ export function PetForm({ onSuccess, onCancel }: PetFormProps) {
           </select>
         </div>
         <div>
-          <label className="block text-slate-300 text-sm mb-1">Sexo *</label>
-          <select value={sex} onChange={(e) => setSex(e.target.value)}
-            className="w-full bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500">
+          <label className={labelClass}>Sexo *</label>
+          <select value={sex} onChange={(e) => setSex(e.target.value)} className={inputClass}>
             <option value="male">Macho</option>
             <option value="female">Hembra</option>
           </select>
@@ -71,25 +82,38 @@ export function PetForm({ onSuccess, onCancel }: PetFormProps) {
       </div>
 
       <div>
-        <label className="block text-slate-300 text-sm mb-1">Raza</label>
-        <input value={breed} onChange={(e) => setBreed(e.target.value)}
-          className="w-full bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500"
-          placeholder="Opcional" />
+        <label className={labelClass}>Raza</label>
+        <input
+          value={breed}
+          onChange={(e) => setBreed(e.target.value)}
+          placeholder="Opcional"
+          className={inputClass}
+        />
       </div>
 
       <div>
-        <label className="block text-slate-300 text-sm mb-1">Fecha de nacimiento</label>
-        <input type="date" value={birthDate} onChange={(e) => setBirthDate(e.target.value)}
-          className="w-full bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500" />
+        <label className={labelClass}>Fecha de nacimiento</label>
+        <input
+          type="date"
+          value={birthDate}
+          onChange={(e) => setBirthDate(e.target.value)}
+          className={inputClass}
+        />
       </div>
 
       <div className="flex gap-3 pt-2">
-        <button type="button" onClick={onCancel}
-          className="flex-1 bg-slate-700 hover:bg-slate-600 text-white rounded-lg py-2 text-sm transition-colors">
+        <button
+          type="button"
+          onClick={onCancel}
+          className="flex-1 bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 rounded-lg py-2.5 text-sm font-medium transition-all duration-200 cursor-pointer active:scale-95 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-2"
+        >
           Cancelar
         </button>
-        <button type="submit" disabled={loading}
-          className="flex-1 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-semibold rounded-lg py-2 text-sm transition-colors">
+        <button
+          type="submit"
+          disabled={loading}
+          className="flex-1 bg-vet-500 hover:bg-vet-600 disabled:opacity-50 text-white font-semibold rounded-lg py-2.5 text-sm transition-all duration-200 cursor-pointer active:scale-95 disabled:active:scale-100 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-vet-500 focus:ring-offset-2"
+        >
           {loading ? 'Guardando...' : 'Crear mascota'}
         </button>
       </div>
