@@ -23,6 +23,8 @@ export default function DashboardPage() {
         </div>
         <div className="flex items-center gap-4">
           <a href="/pets" className="text-slate-300 hover:text-white text-sm">Mascotas</a>
+          <a href="/appointments" className="text-slate-300 hover:text-white text-sm">Citas</a>
+          <a href="/inventory" className="text-slate-300 hover:text-white text-sm">Inventario</a>
           <button onClick={() => { clearAuth(); router.push('/login'); }} className="text-slate-400 hover:text-white text-sm">
             Salir
           </button>
@@ -43,6 +45,23 @@ export default function DashboardPage() {
             <div className="font-semibold">Mascotas</div>
             <div className="text-slate-400 text-sm mt-1">Ver y gestionar pacientes</div>
           </a>
+          <a href="/appointments" className="bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl p-6 block transition-colors">
+            <div className="text-3xl mb-3">📅</div>
+            <div className="font-semibold">Citas</div>
+            <div className="text-slate-400 text-sm mt-1">Agenda del día</div>
+          </a>
+          <a href="/inventory" className="bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl p-6 block transition-colors">
+            <div className="text-3xl mb-3">📦</div>
+            <div className="font-semibold">Inventario</div>
+            <div className="text-slate-400 text-sm mt-1">Stock de productos</div>
+          </a>
+          {role === 'ADMIN' && (
+            <a href="/reports" className="bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl p-6 block transition-colors">
+              <div className="text-3xl mb-3">📊</div>
+              <div className="font-semibold">Reportes</div>
+              <div className="text-slate-400 text-sm mt-1">PDF mensual</div>
+            </a>
+          )}
         </div>
       </main>
     </div>
