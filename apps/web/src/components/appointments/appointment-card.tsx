@@ -1,3 +1,5 @@
+'use client';
+
 interface AppointmentDoc {
   id: string;
   startsAt: string;

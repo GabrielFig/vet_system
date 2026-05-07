@@ -34,12 +34,16 @@ export default function AppointmentsPage() {
   }, [ready, user, accessToken, date]);
 
   async function handleStatusChange(id: string, status: string) {
-    await apiFetch(`/appointments/${id}/status`, {
-      method: 'PATCH',
-      token: accessToken ?? undefined,
-      body: { status },
-    });
-    setAppointments((prev) => prev.map((a) => a.id === id ? { ...a, status: status as AppointmentDoc['status'] } : a));
+    try {
+      await apiFetch(`/appointments/${id}/status`, {
+        method: 'PATCH',
+        token: accessToken ?? undefined,
+        body: { status },
+      });
+      setAppointments((prev) => prev.map((a) => a.id === id ? { ...a, status: status as AppointmentDoc['status'] } : a));
+    } catch {
+      // status update failed — UI remains unchanged
+    }
   }
 
   if (!ready || !user) return <div className="min-h-screen bg-slate-900" />;
