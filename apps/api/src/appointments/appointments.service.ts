@@ -51,14 +51,14 @@ export class AppointmentsService {
     const schedule = await this.prisma.clinicSchedule.findUnique({ where: { clinicId } });
     if (!schedule) return [];
 
-    const date = new Date(dateStr);
-    const dayOfWeek = date.getUTCDay();
+    // Parse as local date to avoid UTC-midnight offset shifting the day
+    const [y, mo, d] = dateStr.split('-').map(Number);
+    const date = new Date(y, mo - 1, d);
+    const dayOfWeek = date.getDay();
     if (!schedule.workDays.includes(dayOfWeek)) return [];
 
-    const dayStart = new Date(date);
-    dayStart.setUTCHours(0, 0, 0, 0);
-    const dayEnd = new Date(date);
-    dayEnd.setUTCHours(23, 59, 59, 999);
+    const dayStart = new Date(y, mo - 1, d, 0, 0, 0, 0);
+    const dayEnd = new Date(y, mo - 1, d, 23, 59, 59, 999);
 
     const exception = await this.prisma.scheduleException.findFirst({
       where: { clinicId, date: { gte: dayStart, lte: dayEnd } },
@@ -75,8 +75,7 @@ export class AppointmentsService {
 
     const slots: { startsAt: Date; endsAt: Date }[] = [];
     for (let m = startMinutes; m + schedule.slotMinutes <= endMinutes; m += schedule.slotMinutes) {
-      const startsAt = new Date(date);
-      startsAt.setUTCHours(Math.floor(m / 60), m % 60, 0, 0);
+      const startsAt = new Date(y, mo - 1, d, Math.floor(m / 60), m % 60, 0, 0);
       const endsAt = new Date(startsAt.getTime() + schedule.slotMinutes * 60000);
       slots.push({ startsAt, endsAt });
     }
@@ -101,12 +100,11 @@ export class AppointmentsService {
     const where: Record<string, unknown> = { clinicId };
 
     if (dto.date) {
-      const d = new Date(dto.date);
-      const dayStart = new Date(d);
-      dayStart.setUTCHours(0, 0, 0, 0);
-      const dayEnd = new Date(d);
-      dayEnd.setUTCHours(23, 59, 59, 999);
-      where['startsAt'] = { gte: dayStart, lte: dayEnd };
+      const [fy, fm, fd] = dto.date.split('-').map(Number);
+      where['startsAt'] = {
+        gte: new Date(fy, fm - 1, fd, 0, 0, 0, 0),
+        lte: new Date(fy, fm - 1, fd, 23, 59, 59, 999),
+      };
     }
     if (dto.doctorId) where['doctorId'] = dto.doctorId;
     if (dto.status) where['status'] = dto.status;
