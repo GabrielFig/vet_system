@@ -28,21 +28,23 @@ enum PetSex {
 // ── ENTIDADES GLOBALES ────────────────────────────────────
 
 model User {
-  id                    String         @id @default(uuid())
-  email                 String         @unique
+  id                    String          @id @default(uuid())
+  email                 String          @unique
   passwordHash          String
   firstName             String
   lastName              String
   phone                 String?
   avatarUrl             String?
-  isActive              Boolean        @default(true)
-  createdAt             DateTime       @default(now())
+  isActive              Boolean         @default(true)
+  createdAt             DateTime        @default(now())
   clinics               ClinicUser[]
   pets                  Pet[]
-  consultationsAsDoctor Consultation[] @relation("ConsultationDoctor")
-  medicalNotesAuthored  MedicalNote[]  @relation("NoteAuthor")
-  prescriptionsIssued   Prescription[] @relation("PrescriptionDoctor")
-  vaccinationsApplied   Vaccination[]  @relation("VaccinationAppliedBy")
+  consultationsAsDoctor Consultation[]  @relation("ConsultationDoctor")
+  medicalNotesAuthored  MedicalNote[]   @relation("NoteAuthor")
+  prescriptionsIssued   Prescription[]  @relation("PrescriptionDoctor")
+  vaccinationsApplied   Vaccination[]   @relation("VaccinationAppliedBy")
+  appointments          Appointment[]   @relation("AppointmentDoctor")
+  stockMovements        StockMovement[] @relation("StockMovementUser")
 }
 
 model Pet {
@@ -56,8 +58,9 @@ model Pet {
   photoUrl  String?
   createdAt DateTime       @default(now())
   updatedAt DateTime       @updatedAt
-  owner     User           @relation(fields: [ownerId], references: [id])
-  record    MedicalRecord?
+  owner        User           @relation(fields: [ownerId], references: [id])
+  record       MedicalRecord?
+  appointments Appointment[]
 
   @@index([ownerId])
 }
@@ -168,5 +171,101 @@ model Vaccination {
   appliedBy      User         @relation("VaccinationAppliedBy", fields: [appliedById], references: [id])
 
   @@index([consultationId])
+  @@index([clinicId])
+}
+
+// ── CITAS ─────────────────────────────────────────────────
+
+enum AppointmentStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  DONE
+}
+
+model ClinicSchedule {
+  id          String   @id @default(uuid())
+  clinicId    String   @unique
+  workDays    Int[]
+  startTime   String
+  endTime     String
+  slotMinutes Int      @default(30)
+  updatedAt   DateTime @updatedAt
+}
+
+model ScheduleException {
+  id        String   @id @default(uuid())
+  clinicId  String
+  date      DateTime
+  isClosed  Boolean  @default(true)
+  startTime String?
+  endTime   String?
+  reason    String?
+
+  @@index([clinicId])
+}
+
+model Appointment {
+  id        String            @id @default(uuid())
+  clinicId  String
+  petId     String
+  doctorId  String
+  startsAt  DateTime
+  endsAt    DateTime
+  reason    String
+  status    AppointmentStatus @default(PENDING)
+  notes     String?
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+  pet       Pet               @relation(fields: [petId], references: [id])
+  doctor    User              @relation("AppointmentDoctor", fields: [doctorId], references: [id])
+
+  @@index([clinicId])
+  @@index([petId])
+  @@index([doctorId])
+  @@index([startsAt])
+}
+
+// ── INVENTARIO ────────────────────────────────────────────
+
+enum MovementType {
+  IN
+  OUT
+  ADJUSTMENT
+}
+
+model Product {
+  id           String          @id @default(uuid())
+  clinicId     String
+  name         String
+  sku          String
+  category     String
+  unit         String
+  currentStock Int             @default(0)
+  minStock     Int             @default(5)
+  costPrice    Decimal         @db.Decimal(10, 2)
+  salePrice    Decimal         @db.Decimal(10, 2)
+  isActive     Boolean         @default(true)
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+  movements    StockMovement[]
+
+  @@unique([clinicId, sku])
+  @@index([clinicId])
+}
+
+model StockMovement {
+  id        String       @id @default(uuid())
+  productId String
+  clinicId  String
+  userId    String
+  type      MovementType
+  quantity  Int
+  notes     String?
+  createdAt DateTime     @default(now())
+  product   Product      @relation(fields: [productId], references: [id])
+  user      User         @relation("StockMovementUser", fields: [userId], references: [id])
+
+  @@index([productId])
   @@index([clinicId])
 }
