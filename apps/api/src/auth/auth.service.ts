@@ -94,19 +94,26 @@ export class AuthService {
     return this.buildAuthResponse(clinicUser.user, clinicUser.clinic, clinicUser.role as Role);
   }
 
-  async refresh(refreshToken: string): Promise<{ accessToken: string }> {
+  async refresh(refreshToken: string): Promise<{ accessToken: string; refreshToken: string }> {
     const isBlacklisted = await this.redis.get(`bl:${refreshToken}`);
     if (isBlacklisted) throw new UnauthorizedException('TOKEN_EXPIRED');
 
-    let payload: JwtPayload;
+    let decoded: JwtPayload & { iat?: number; exp?: number };
     try {
-      payload = this.jwt.verify(refreshToken) as JwtPayload;
+      decoded = this.jwt.verify(refreshToken) as JwtPayload & { iat?: number; exp?: number };
     } catch {
       throw new UnauthorizedException('TOKEN_EXPIRED');
     }
 
-    const accessToken = this.signAccess(payload);
-    return { accessToken };
+    // Strip JWT standard claims before re-signing — jsonwebtoken rejects
+    // expiresIn when the payload already carries exp/iat.
+    const { iat: _iat, exp: _exp, ...cleanPayload } = decoded;
+    const newAccessToken = this.signAccess(cleanPayload as JwtPayload);
+    const newRefreshToken = this.jwt.sign(cleanPayload, {
+      expiresIn: this.config.get('REFRESH_TOKEN_EXPIRY', '7d'),
+    });
+
+    return { accessToken: newAccessToken, refreshToken: newRefreshToken };
   }
 
   async logout(refreshToken: string): Promise<void> {
