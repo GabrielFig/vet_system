@@ -7,6 +7,7 @@ import { AppointmentCard } from '@/components/appointments/appointment-card';
 import { NewAppointmentForm } from '@/components/appointments/new-appointment-form';
 import { AppShell } from '@/components/layout/app-shell';
 import { SkeletonCard } from '@/components/ui/skeleton';
+import { ScheduleConfig } from '@/components/appointments/schedule-config';
 
 interface AppointmentDoc {
   id: string; startsAt: string; endsAt: string; reason: string;
@@ -54,6 +55,7 @@ export default function AppointmentsPage() {
   const [appointments, setAppointments] = useState<AppointmentDoc[]>([]);
   const [date, setDate] = useState(todayStr());
   const [showForm, setShowForm] = useState(false);
+  const [showSchedule, setShowSchedule] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -98,6 +100,18 @@ export default function AppointmentsPage() {
             onChange={(e) => setDate(e.target.value)}
             className="border border-gray-200 bg-white text-vet-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-vet-500 focus:border-transparent transition-all duration-200 cursor-pointer"
           />
+          {role === 'ADMIN' && (
+            <button
+              onClick={() => setShowSchedule(true)}
+              title="Configurar horario"
+              className="p-2 rounded-lg border border-gray-200 text-gray-500 hover:border-vet-300 hover:text-vet-600 transition-all duration-200 cursor-pointer"
+            >
+              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+            </button>
+          )}
           {canAdmin && (
             <button
               onClick={() => setShowForm(true)}
@@ -129,6 +143,11 @@ export default function AppointmentsPage() {
             <AppointmentCard key={a.id} appointment={a} onStatusChange={handleStatusChange} canAdmin={canAdmin} token={accessToken} />
           ))}
         </div>
+      )}
+
+      {/* Schedule config modal */}
+      {showSchedule && (
+        <ScheduleConfig token={accessToken} onClose={() => setShowSchedule(false)} />
       )}
 
       {/* New appointment modal */}

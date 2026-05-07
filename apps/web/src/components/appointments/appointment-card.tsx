@@ -123,7 +123,7 @@ export function AppointmentCard({ appointment: a, onStatusChange, canAdmin, toke
   }
 
   const selectedProduct = products.find((p) => p.id === addForm.productId);
-  const canAddMaterials = a.status !== 'CANCELLED' && (canAdmin || a.status === 'CONFIRMED' || a.status === 'DONE');
+  const canAddMaterials = a.status !== 'CANCELLED';
 
   return (
     <div className={`bg-white rounded-xl shadow-sm border border-vet-100 border-l-4 ${STATUS_BORDER[a.status]} p-4 hover:shadow-md transition-all duration-200`}>
