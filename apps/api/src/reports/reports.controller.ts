@@ -3,7 +3,8 @@ import { Response } from 'express';
 import { ReportsService } from './reports.service';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { Roles } from '../common/decorators/roles.decorator';
-import { JwtPayload, Role } from '@vet/shared-types';
+import { RequiresPlan } from '../common/decorators/requires-plan.decorator';
+import { JwtPayload, Role, PlanType } from '@vet/shared-types';
 
 @Controller()
 export class ReportsController {
@@ -20,6 +21,7 @@ export class ReportsController {
     res.end(buffer);
   }
 
+  @RequiresPlan(PlanType.PRO)
   @Roles(Role.ADMIN)
   @Get('reports/monthly')
   async monthlyReport(

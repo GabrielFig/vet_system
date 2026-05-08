@@ -6,71 +6,107 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🌱 Seeding database...');
 
-  const canesClinic = await prisma.clinic.upsert({
+  const hash = (pw: string) => bcrypt.hash(pw, 12);
+
+  // ── Clinics ───────────────────────────────────────────────────────────────
+
+  const basicClinic = await prisma.clinic.upsert({
+    where: { slug: 'petcare-basico' },
+    update: {},
+    create: { name: 'PetCare Básico', slug: 'petcare-basico', licenseKey: 'BASIC-2026-LICENSE', planType: PlanType.BASIC },
+  });
+
+  const proClinic = await prisma.clinic.upsert({
     where: { slug: 'canes' },
     update: {},
     create: { name: 'Canes Vet', slug: 'canes', licenseKey: 'CANES-2026-LICENSE', planType: PlanType.PRO },
   });
 
-  const mininosClinic = await prisma.clinic.upsert({
-    where: { slug: 'mininos' },
+  const enterpriseClinic = await prisma.clinic.upsert({
+    where: { slug: 'elite-animal' },
     update: {},
-    create: { name: 'Mininos Vet', slug: 'mininos', licenseKey: 'MININOS-2026-LICENSE', planType: PlanType.BASIC },
+    create: { name: 'Elite Animal Hospital', slug: 'elite-animal', licenseKey: 'ELITE-2026-LICENSE', planType: PlanType.ENTERPRISE },
   });
 
-  const hash = (pw: string) => bcrypt.hash(pw, 12);
+  // ── Users ─────────────────────────────────────────────────────────────────
 
-  const canesAdmin = await prisma.user.upsert({
+  // BASIC
+  const basicAdmin = await prisma.user.upsert({
+    where: { email: 'admin@basic.com' },
+    update: {},
+    create: { email: 'admin@basic.com', passwordHash: await hash('Admin1234!'), firstName: 'María', lastName: 'Torres' },
+  });
+  await prisma.clinicUser.upsert({
+    where: { clinicId_userId: { clinicId: basicClinic.id, userId: basicAdmin.id } },
+    update: {},
+    create: { clinicId: basicClinic.id, userId: basicAdmin.id, role: Role.ADMIN },
+  });
+
+  const basicDoctor = await prisma.user.upsert({
+    where: { email: 'doctor@basic.com' },
+    update: {},
+    create: { email: 'doctor@basic.com', passwordHash: await hash('Doctor1234!'), firstName: 'Luis', lastName: 'Ramírez' },
+  });
+  await prisma.clinicUser.upsert({
+    where: { clinicId_userId: { clinicId: basicClinic.id, userId: basicDoctor.id } },
+    update: {},
+    create: { clinicId: basicClinic.id, userId: basicDoctor.id, role: Role.DOCTOR },
+  });
+
+  // PRO
+  const proAdmin = await prisma.user.upsert({
     where: { email: 'admin@canes.com' },
     update: {},
     create: { email: 'admin@canes.com', passwordHash: await hash('Admin1234!'), firstName: 'Carlos', lastName: 'Mendoza' },
   });
   await prisma.clinicUser.upsert({
-    where: { clinicId_userId: { clinicId: canesClinic.id, userId: canesAdmin.id } },
+    where: { clinicId_userId: { clinicId: proClinic.id, userId: proAdmin.id } },
     update: {},
-    create: { clinicId: canesClinic.id, userId: canesAdmin.id, role: Role.ADMIN },
+    create: { clinicId: proClinic.id, userId: proAdmin.id, role: Role.ADMIN },
   });
 
-  const canesDoctor = await prisma.user.upsert({
+  const proDoctor = await prisma.user.upsert({
     where: { email: 'doctor@canes.com' },
     update: {},
     create: { email: 'doctor@canes.com', passwordHash: await hash('Doctor1234!'), firstName: 'Roberto', lastName: 'García' },
   });
   await prisma.clinicUser.upsert({
-    where: { clinicId_userId: { clinicId: canesClinic.id, userId: canesDoctor.id } },
+    where: { clinicId_userId: { clinicId: proClinic.id, userId: proDoctor.id } },
     update: {},
-    create: { clinicId: canesClinic.id, userId: canesDoctor.id, role: Role.DOCTOR },
+    create: { clinicId: proClinic.id, userId: proDoctor.id, role: Role.DOCTOR },
   });
 
-  const mininosAdmin = await prisma.user.upsert({
-    where: { email: 'admin@mininos.com' },
+  // ENTERPRISE
+  const enterpriseAdmin = await prisma.user.upsert({
+    where: { email: 'admin@elite.com' },
     update: {},
-    create: { email: 'admin@mininos.com', passwordHash: await hash('Admin1234!'), firstName: 'Laura', lastName: 'Sánchez' },
+    create: { email: 'admin@elite.com', passwordHash: await hash('Admin1234!'), firstName: 'Valentina', lastName: 'Herrera' },
   });
   await prisma.clinicUser.upsert({
-    where: { clinicId_userId: { clinicId: mininosClinic.id, userId: mininosAdmin.id } },
+    where: { clinicId_userId: { clinicId: enterpriseClinic.id, userId: enterpriseAdmin.id } },
     update: {},
-    create: { clinicId: mininosClinic.id, userId: mininosAdmin.id, role: Role.ADMIN },
+    create: { clinicId: enterpriseClinic.id, userId: enterpriseAdmin.id, role: Role.ADMIN },
   });
 
-  const mininosDoctor = await prisma.user.upsert({
-    where: { email: 'doctor@mininos.com' },
+  const enterpriseDoctor = await prisma.user.upsert({
+    where: { email: 'doctor@elite.com' },
     update: {},
-    create: { email: 'doctor@mininos.com', passwordHash: await hash('Doctor1234!'), firstName: 'Elena', lastName: 'López' },
+    create: { email: 'doctor@elite.com', passwordHash: await hash('Doctor1234!'), firstName: 'Andrés', lastName: 'Morales' },
   });
   await prisma.clinicUser.upsert({
-    where: { clinicId_userId: { clinicId: mininosClinic.id, userId: mininosDoctor.id } },
+    where: { clinicId_userId: { clinicId: enterpriseClinic.id, userId: enterpriseDoctor.id } },
     update: {},
-    create: { clinicId: mininosClinic.id, userId: mininosDoctor.id, role: Role.DOCTOR },
+    create: { clinicId: enterpriseClinic.id, userId: enterpriseDoctor.id, role: Role.DOCTOR },
   });
 
-  // Client (pet owner) — no system login
+  // ── Clients & Pets ────────────────────────────────────────────────────────
+
   const anaClient = await prisma.client.upsert({
     where: { id: 'seed-client-ana-rodriguez-000000001' },
     update: {},
     create: {
       id: 'seed-client-ana-rodriguez-000000001',
-      clinicId: canesClinic.id,
+      clinicId: proClinic.id,
       firstName: 'Ana',
       lastName: 'Rodríguez',
       phone: '+52 55 1234 5678',
@@ -104,8 +140,8 @@ async function main() {
     create: {
       id: 'seed-luna-consult1-000000000000000001',
       recordId: lunaRecord.id,
-      clinicId: canesClinic.id,
-      doctorId: canesDoctor.id,
+      clinicId: proClinic.id,
+      doctorId: proDoctor.id,
       reason: 'Revisión general',
       createdAt: new Date('2026-05-05'),
     },
@@ -116,11 +152,10 @@ async function main() {
     update: {},
     create: {
       consultationId: lunaConsult1.id,
-      clinicId: canesClinic.id,
-      authorId: canesDoctor.id,
+      clinicId: proClinic.id,
+      authorId: proDoctor.id,
       title: 'Revisión general',
-      content:
-        'Paciente en buen estado general. Peso 28kg. Sin alteraciones en auscultación cardiopulmonar. Mucosas rosadas. Temperatura normal.',
+      content: 'Paciente en buen estado general. Peso 28kg. Sin alteraciones en auscultación cardiopulmonar. Mucosas rosadas. Temperatura normal.',
     },
   });
 
@@ -130,8 +165,8 @@ async function main() {
     create: {
       id: 'seed-luna-presc1-0000000000000000001',
       consultationId: lunaConsult1.id,
-      clinicId: canesClinic.id,
-      doctorId: canesDoctor.id,
+      clinicId: proClinic.id,
+      doctorId: proDoctor.id,
       diagnosis: 'Paciente sano en revisión preventiva',
       medications: 'Vitamina E 400mg — 1 cápsula diaria por 30 días',
       instructions: 'Administrar con comida. Guardar en lugar fresco y seco.',
@@ -145,38 +180,12 @@ async function main() {
     create: {
       id: 'seed-luna-vacc1-00000000000000000001',
       consultationId: lunaConsult1.id,
-      clinicId: canesClinic.id,
-      appliedById: canesDoctor.id,
+      clinicId: proClinic.id,
+      appliedById: proDoctor.id,
       vaccineName: 'Antirrábica',
       batch: 'RABV-2026-001',
       appliedAt: new Date('2026-05-05'),
       nextDose: new Date('2027-05-05'),
-    },
-  });
-
-  const lunaConsult2 = await prisma.consultation.upsert({
-    where: { id: 'seed-luna-consult2-000000000000000002' },
-    update: {},
-    create: {
-      id: 'seed-luna-consult2-000000000000000002',
-      recordId: lunaRecord.id,
-      clinicId: mininosClinic.id,
-      doctorId: mininosDoctor.id,
-      reason: 'Control de peso',
-      createdAt: new Date('2026-04-12'),
-    },
-  });
-
-  await prisma.medicalNote.upsert({
-    where: { consultationId: lunaConsult2.id },
-    update: {},
-    create: {
-      consultationId: lunaConsult2.id,
-      clinicId: mininosClinic.id,
-      authorId: mininosDoctor.id,
-      title: 'Control de peso mensual',
-      content:
-        'Peso estable en 28kg. Se recomienda reducir porción diaria de alimento balanceado a 300g. Próxima cita en 30 días.',
     },
   });
 
@@ -200,16 +209,24 @@ async function main() {
     create: { petId: michi.id },
   });
 
-  console.log('✅ Seed completo.');
+  console.log('✅ Seed completo.\n');
+  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+  console.log('  Plan BASIC  — PetCare Básico');
+  console.log('    admin@basic.com    / Admin1234!  (ADMIN)');
+  console.log('    doctor@basic.com   / Doctor1234! (DOCTOR)');
+  console.log('    Acceso: Clientes, Mascotas, Citas, Historial médico');
+  console.log('    Bloqueado: Inventario, Reportes');
   console.log('');
-  console.log('Usuarios demo:');
-  console.log('  admin@canes.com    / Admin1234!  (ADMIN  en Canes Vet)');
-  console.log('  doctor@canes.com   / Doctor1234! (DOCTOR en Canes Vet)');
-  console.log('  admin@mininos.com  / Admin1234!  (ADMIN  en Mininos Vet)');
-  console.log('  doctor@mininos.com / Doctor1234! (DOCTOR en Mininos Vet)');
+  console.log('  Plan PRO    — Canes Vet');
+  console.log('    admin@canes.com    / Admin1234!  (ADMIN)');
+  console.log('    doctor@canes.com   / Doctor1234! (DOCTOR)');
+  console.log('    Acceso: Todo BASIC + Inventario + Reportes de citas');
   console.log('');
-  console.log('Clientes demo:');
-  console.log('  Ana Rodríguez — Luna (Labrador) + Michi (Siamés) en Canes Vet');
+  console.log('  Plan ENTERPRISE — Elite Animal Hospital');
+  console.log('    admin@elite.com    / Admin1234!  (ADMIN)');
+  console.log('    doctor@elite.com   / Doctor1234! (DOCTOR)');
+  console.log('    Acceso: Todo PRO + features premium (acceso completo)');
+  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 }
 
 main()

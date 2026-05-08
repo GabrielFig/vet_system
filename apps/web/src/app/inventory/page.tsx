@@ -7,6 +7,8 @@ import { ProductForm } from '@/components/inventory/product-form';
 import { MovementForm } from '@/components/inventory/movement-form';
 import { AppShell } from '@/components/layout/app-shell';
 import { Skeleton } from '@/components/ui/skeleton';
+import { usePlan } from '@/hooks/use-plan';
+import { UpgradeBanner } from '@/components/ui/upgrade-banner';
 
 interface Product {
   id: string; name: string; sku: string; category: string; unit: string;
@@ -56,22 +58,31 @@ function SkeletonRow() {
 
 export default function InventoryPage() {
   const { user, accessToken, role, ready } = useRequireAuth();
+  const { canUseInventory, planType } = usePlan();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [showProductForm, setShowProductForm] = useState(false);
   const [movementProductId, setMovementProductId] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!ready || !user) return;
+    if (!ready || !user || !canUseInventory) return;
     apiFetch<Product[]>('/products', { token: accessToken ?? undefined })
       .then(setProducts)
       .finally(() => setLoading(false));
-  }, [ready, user, accessToken]);
+  }, [ready, user, accessToken, canUseInventory]);
 
   const isAdmin = role === 'ADMIN';
   const movementProduct = products.find((p) => p.id === movementProductId);
 
   if (!ready || !user) return <div className="min-h-screen bg-vet-50" />;
+
+  if (!canUseInventory) {
+    return (
+      <AppShell>
+        <UpgradeBanner feature="Inventario" requiredPlan="PRO" currentPlan={planType} />
+      </AppShell>
+    );
+  }
 
   return (
     <AppShell>

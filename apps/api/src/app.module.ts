@@ -5,6 +5,7 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { PrismaService } from './prisma/prisma.service';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
+import { PlanGuard } from './common/guards/plan.guard';
 import { TenantInterceptor } from './common/interceptors/tenant.interceptor';
 import { AuthModule } from './auth/auth.module';
 import { PetsModule } from './pets/pets.module';
@@ -33,6 +34,7 @@ import { ClientsModule } from './clients/clients.module';
     { provide: APP_GUARD, useClass: ThrottlerGuard },
     { provide: APP_GUARD, useClass: JwtAuthGuard },
     { provide: APP_GUARD, useClass: RolesGuard },
+    { provide: APP_GUARD, useClass: PlanGuard },
     { provide: APP_INTERCEPTOR, useClass: TenantInterceptor },
   ],
   exports: [PrismaService],

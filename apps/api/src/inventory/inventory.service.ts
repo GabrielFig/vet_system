@@ -73,8 +73,8 @@ export class InventoryService {
       >`
         SELECT id, "currentStock", "minStock", "isActive", "clinicId"
         FROM "Product"
-        WHERE id = ${productId}::uuid
-          AND "clinicId" = ${clinicId}::uuid
+        WHERE id::text = ${productId}
+          AND "clinicId"::text = ${clinicId}
           AND "isActive" = true
         FOR UPDATE
       `;

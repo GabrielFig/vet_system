@@ -12,6 +12,7 @@ export interface JwtPayload {
     clinicId: string;
     role: Role;
     email: string;
+    planType: PlanType;
 }
 export interface AuthUser {
     id: string;

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/auth.store';
+import { usePlan } from '@/hooks/use-plan';
 
 function HomeIcon() {
   return (
@@ -112,15 +113,24 @@ const navItems = [
   { label: 'Clientes', href: '/clients', icon: UsersIcon },
   { label: 'Mascotas', href: '/pets', icon: PawIcon },
   { label: 'Citas', href: '/appointments', icon: CalendarIcon },
-  { label: 'Inventario', href: '/inventory', icon: BoxIcon },
-  { label: 'Reportes', href: '/reports', icon: ChartIcon, adminOnly: true },
+  { label: 'Inventario', href: '/inventory', icon: BoxIcon, requiredPlan: 'PRO' as const },
+  { label: 'Reportes', href: '/reports', icon: ChartIcon, adminOnly: true, requiredPlan: 'PRO' as const },
 ];
+
+const PLAN_LABELS: Record<string, string> = { PRO: 'Pro', ENTERPRISE: 'Enterprise' };
 
 export function Sidebar() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
   const { user, clinic, role, clearAuth } = useAuthStore();
+  const { planType, planLabel, canUseInventory, canUseReports } = usePlan();
+
+  function isPlanLocked(requiredPlan?: string): boolean {
+    if (!requiredPlan) return false;
+    if (requiredPlan === 'PRO' && !canUseInventory) return true;
+    return false;
+  }
 
   function handleLogout() {
     clearAuth();
@@ -178,7 +188,25 @@ export function Sidebar() {
           {navItems
             .filter((item) => !item.adminOnly || role === 'ADMIN')
             .map((item) => {
-              const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
+              const locked = isPlanLocked(item.requiredPlan);
+              const isActive = !locked && (pathname === item.href || pathname.startsWith(item.href + '/'));
+
+              if (locked) {
+                return (
+                  <div
+                    key={item.href}
+                    title={`Solo en plan ${PLAN_LABELS[item.requiredPlan ?? ''] ?? item.requiredPlan}`}
+                    className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-vet-600 cursor-not-allowed select-none"
+                  >
+                    <item.icon />
+                    <span className="flex-1">{item.label}</span>
+                    <span className="text-[10px] bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded px-1.5 py-0.5 font-semibold leading-none">
+                      {PLAN_LABELS[item.requiredPlan ?? ''] ?? item.requiredPlan}
+                    </span>
+                  </div>
+                );
+              }
+
               return (
                 <Link
                   key={item.href}
@@ -199,7 +227,20 @@ export function Sidebar() {
 
         {/* Footer */}
         <div className="px-4 py-4 border-t border-vet-700">
-          <div className="flex items-center gap-3 mb-3">
+          {/* Plan badge */}
+          <div className="mb-3 flex items-center justify-between">
+            <span className="text-vet-400 text-xs">Plan actual</span>
+            <span className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${
+              planType === 'ENTERPRISE'
+                ? 'bg-purple-500/20 text-purple-300 border-purple-500/30'
+                : planType === 'PRO'
+                ? 'bg-vet-500/20 text-vet-300 border-vet-500/30'
+                : 'bg-gray-500/20 text-gray-400 border-gray-500/30'
+            }`}>
+              {planLabel}
+            </span>
+          </div>
+          <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-full bg-vet-600 flex items-center justify-center text-white text-sm font-semibold flex-shrink-0">
               {firstName.charAt(0).toUpperCase()}
             </div>

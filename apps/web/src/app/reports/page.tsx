@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { useRequireAuth } from '@/hooks/use-require-auth';
 import { useAuthStore } from '@/store/auth.store';
 import { AppShell } from '@/components/layout/app-shell';
+import { usePlan } from '@/hooks/use-plan';
+import { UpgradeBanner } from '@/components/ui/upgrade-banner';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
@@ -51,12 +53,21 @@ const labelClass = 'block text-sm font-medium text-vet-800 mb-1';
 export default function ReportsPage() {
   const { user, accessToken, ready } = useRequireAuth();
   const { role } = useAuthStore();
+  const { canUseReports, planType } = usePlan();
   const now = new Date();
   const [month, setMonth] = useState(String(now.getMonth() + 1));
   const [year, setYear] = useState(String(now.getFullYear()));
   const [loading, setLoading] = useState(false);
 
   if (!ready || !user) return <div className="min-h-screen bg-vet-50" />;
+
+  if (!canUseReports) {
+    return (
+      <AppShell>
+        <UpgradeBanner feature="Reportes" requiredPlan="PRO" currentPlan={planType} />
+      </AppShell>
+    );
+  }
 
   if (role !== 'ADMIN') {
     return (

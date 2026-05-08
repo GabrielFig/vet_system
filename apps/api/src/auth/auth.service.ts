@@ -14,6 +14,7 @@ import {
   ClinicSelectionRequired,
   LoginResult,
   Role,
+  PlanType,
 } from '@vet/shared-types';
 import { LoginDto } from './dto/login.dto';
 import { SelectClinicDto } from './dto/select-clinic.dto';
@@ -131,6 +132,7 @@ export class AuthService {
       clinicId: clinic.id,
       role,
       email: user.email,
+      planType: clinic.planType as PlanType,
     };
 
     const accessToken = this.signAccess(jwtPayload);
