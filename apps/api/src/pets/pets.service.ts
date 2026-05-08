@@ -13,24 +13,28 @@ function toDbSex(sex: string): PetSex {
   return sex.toUpperCase() as PetSex;
 }
 
+const clientSelect = { id: true, firstName: true, lastName: true, email: true, phone: true };
+
 @Injectable()
 export class PetsService {
   constructor(private prisma: PrismaService) {}
 
-  async findAll(userId: string, _clinicId: string, role: Role) {
-    const where = role === Role.OWNER ? { ownerId: userId } : {};
+  async findAll(clinicId: string, clientId?: string) {
     return this.prisma.pet.findMany({
-      where,
-      include: { owner: { select: { id: true, firstName: true, lastName: true, email: true } } },
+      where: {
+        client: { clinicId },
+        ...(clientId ? { clientId } : {}),
+      },
+      include: { client: { select: clientSelect } },
       orderBy: { createdAt: 'desc' },
     });
   }
 
-  async findOne(petId: string) {
-    const pet = await this.prisma.pet.findUnique({
-      where: { id: petId },
+  async findOne(petId: string, clinicId: string) {
+    const pet = await this.prisma.pet.findFirst({
+      where: { id: petId, client: { clinicId } },
       include: {
-        owner: { select: { id: true, firstName: true, lastName: true, email: true } },
+        client: { select: clientSelect },
         record: { select: { id: true, publicUuid: true, isPublic: true } },
       },
     });
@@ -38,25 +42,30 @@ export class PetsService {
     return pet;
   }
 
-  async create(dto: CreatePetDto, ownerId: string) {
+  async create(dto: CreatePetDto, clinicId: string) {
+    // Verify client belongs to this clinic
+    const client = await this.prisma.client.findFirst({ where: { id: dto.clientId, clinicId } });
+    if (!client) throw new NotFoundException('Cliente no encontrado');
+
     return this.prisma.$transaction(async (tx) => {
       const pet = await tx.pet.create({
         data: {
-          ownerId,
+          clientId: dto.clientId,
           name: dto.name,
           species: dto.species,
           breed: dto.breed,
           birthDate: dto.birthDate ? new Date(dto.birthDate) : undefined,
           sex: toDbSex(dto.sex),
         },
+        include: { client: { select: clientSelect } },
       });
       await tx.medicalRecord.create({ data: { petId: pet.id } });
       return pet;
     });
   }
 
-  async update(petId: string, dto: UpdatePetDto) {
-    await this.findOne(petId);
+  async update(petId: string, clinicId: string, dto: UpdatePetDto) {
+    await this.findOne(petId, clinicId);
     return this.prisma.pet.update({
       where: { id: petId },
       data: {
@@ -67,14 +76,15 @@ export class PetsService {
         sex: dto.sex ? toDbSex(dto.sex) : undefined,
         photoUrl: dto.photoUrl,
       },
+      include: { client: { select: clientSelect } },
     });
   }
 
-  async remove(petId: string, role: Role) {
+  async remove(petId: string, clinicId: string, role: Role) {
     if (role !== Role.ADMIN) {
       throw new ForbiddenException('Solo los administradores pueden eliminar mascotas');
     }
-    const pet = await this.prisma.pet.findUnique({ where: { id: petId } });
+    const pet = await this.prisma.pet.findFirst({ where: { id: petId, client: { clinicId } } });
     if (!pet) throw new NotFoundException('Mascota no encontrada');
     return this.prisma.pet.delete({ where: { id: petId } });
   }

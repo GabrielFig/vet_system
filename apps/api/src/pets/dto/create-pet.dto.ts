@@ -1,6 +1,9 @@
-import { IsString, IsEnum, IsOptional, IsISO8601 } from 'class-validator';
+import { IsString, IsEnum, IsOptional, IsISO8601, IsUUID } from 'class-validator';
 
 export class CreatePetDto {
+  @IsUUID()
+  clientId: string;
+
   @IsString()
   name: string;
 

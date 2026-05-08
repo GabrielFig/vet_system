@@ -11,7 +11,7 @@ export class PublicService {
       include: {
         pet: {
           include: {
-            owner: { select: { firstName: true, lastName: true } },
+            client: { select: { firstName: true, lastName: true } },
           },
         },
         consultations: {

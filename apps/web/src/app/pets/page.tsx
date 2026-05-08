@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useRequireAuth } from '@/hooks/use-require-auth';
 import { apiFetch } from '@/lib/api';
 import { PetSummary } from '@vet/shared-types';
@@ -47,8 +48,10 @@ function XIcon() {
   );
 }
 
-export default function PetsPage() {
+function PetsPageInner() {
   const { user, accessToken, ready } = useRequireAuth();
+  const searchParams = useSearchParams();
+  const clientId = searchParams.get('clientId');
   const [pets, setPets] = useState<PetSummary[]>([]);
   const [search, setSearch] = useState('');
   const [showForm, setShowForm] = useState(false);
@@ -56,19 +59,22 @@ export default function PetsPage() {
 
   useEffect(() => {
     if (!ready || !user) return;
-    apiFetch<PetSummary[]>('/pets', { token: accessToken ?? undefined })
+    const url = clientId ? `/pets?clientId=${encodeURIComponent(clientId)}` : '/pets';
+    apiFetch<PetSummary[]>(url, { token: accessToken ?? undefined })
       .then(setPets)
       .finally(() => setLoading(false));
-  }, [ready, user, accessToken]);
+  }, [ready, user, accessToken, clientId]);
 
   const filtered = pets.filter(
     (p) =>
       p.name.toLowerCase().includes(search.toLowerCase()) ||
       (p.breed ?? '').toLowerCase().includes(search.toLowerCase()) ||
-      `${p.owner.firstName} ${p.owner.lastName}`.toLowerCase().includes(search.toLowerCase()),
+      `${p.client.firstName} ${p.client.lastName}`.toLowerCase().includes(search.toLowerCase()),
   );
 
   if (!ready || !user) return <div className="min-h-screen bg-vet-50" />;
+
+  const clientName = pets[0]?.client ? `${pets[0].client.firstName} ${pets[0].client.lastName}` : '';
 
   return (
     <AppShell>
@@ -78,7 +84,12 @@ export default function PetsPage() {
           <div className="w-10 h-10 rounded-xl bg-vet-100 flex items-center justify-center text-vet-500">
             <PawIcon />
           </div>
-          <h1 className="font-heading text-2xl font-bold text-vet-800">Mascotas</h1>
+          <div>
+            <h1 className="font-heading text-2xl font-bold text-vet-800">Mascotas</h1>
+            {clientId && clientName && (
+              <p className="text-xs text-vet-500 mt-0.5">Filtrando por: {clientName}</p>
+            )}
+          </div>
         </div>
         <button
           onClick={() => setShowForm(true)}
@@ -148,5 +159,13 @@ export default function PetsPage() {
         </div>
       )}
     </AppShell>
+  );
+}
+
+export default function PetsPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-vet-50" />}>
+      <PetsPageInner />
+    </Suspense>
   );
 }

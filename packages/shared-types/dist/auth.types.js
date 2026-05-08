@@ -5,7 +5,6 @@ var Role;
 (function (Role) {
     Role["ADMIN"] = "ADMIN";
     Role["DOCTOR"] = "DOCTOR";
-    Role["OWNER"] = "OWNER";
 })(Role || (exports.Role = Role = {}));
 var PlanType;
 (function (PlanType) {

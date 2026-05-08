@@ -1,7 +1,6 @@
 export declare enum Role {
     ADMIN = "ADMIN",
-    DOCTOR = "DOCTOR",
-    OWNER = "OWNER"
+    DOCTOR = "DOCTOR"
 }
 export declare enum PlanType {
     BASIC = "BASIC",

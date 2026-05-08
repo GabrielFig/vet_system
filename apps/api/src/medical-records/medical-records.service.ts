@@ -11,7 +11,7 @@ export class MedicalRecordsService {
     const record = await this.prisma.medicalRecord.findUnique({
       where: { id: recordId },
       include: {
-        pet: { include: { owner: { select: { id: true, firstName: true, lastName: true, email: true } } } },
+        pet: { include: { client: { select: { id: true, firstName: true, lastName: true, email: true, phone: true } } } },
         consultations: {
           orderBy: { createdAt: 'desc' },
           include: { note: true, prescriptions: true, vaccinations: true },

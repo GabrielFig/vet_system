@@ -11,7 +11,6 @@ datasource db {
 enum Role {
   ADMIN
   DOCTOR
-  OWNER
 }
 
 enum PlanType {
@@ -38,7 +37,6 @@ model User {
   isActive              Boolean         @default(true)
   createdAt             DateTime        @default(now())
   clinics               ClinicUser[]
-  pets                  Pet[]
   consultationsAsDoctor Consultation[]  @relation("ConsultationDoctor")
   medicalNotesAuthored  MedicalNote[]   @relation("NoteAuthor")
   prescriptionsIssued   Prescription[]  @relation("PrescriptionDoctor")
@@ -47,9 +45,27 @@ model User {
   stockMovements        StockMovement[] @relation("StockMovementUser")
 }
 
+// Cliente de la clínica (dueño de mascota — sin acceso al sistema)
+model Client {
+  id        String   @id @default(uuid())
+  clinicId  String
+  firstName String
+  lastName  String
+  phone     String?
+  email     String?
+  notes     String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  pets      Pet[]
+
+  @@index([clinicId])
+  @@index([clinicId, lastName])
+}
+
 model Pet {
   id        String         @id @default(uuid())
-  ownerId   String
+  clientId  String
   name      String
   species   String
   breed     String?
@@ -58,11 +74,11 @@ model Pet {
   photoUrl  String?
   createdAt DateTime       @default(now())
   updatedAt DateTime       @updatedAt
-  owner        User           @relation(fields: [ownerId], references: [id])
+  client       Client         @relation(fields: [clientId], references: [id])
   record       MedicalRecord?
   appointments Appointment[]
 
-  @@index([ownerId])
+  @@index([clientId])
 }
 
 model MedicalRecord {

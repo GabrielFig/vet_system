@@ -63,7 +63,7 @@ export function PetCard({ pet }: { pet: PetSummary }) {
             {pet.breed ?? pet.species} · {(pet.sex as string) === 'FEMALE' || pet.sex === 'female' ? 'Hembra' : 'Macho'} · {age}
           </div>
           <div className="text-gray-400 text-xs mt-0.5">
-            Dueño: {pet.owner.firstName} {pet.owner.lastName}
+            Dueño: {pet.client.firstName} {pet.client.lastName}
           </div>
         </div>
         <span className="text-vet-300 flex-shrink-0">

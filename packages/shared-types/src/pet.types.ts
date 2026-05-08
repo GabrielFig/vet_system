@@ -1,11 +1,12 @@
 export type PetSpecies = 'dog' | 'cat' | 'bird' | 'rabbit' | 'other';
 export type PetSex = 'male' | 'female';
 
-export interface PetOwner {
+export interface PetClient {
   id: string;
   firstName: string;
   lastName: string;
-  email: string;
+  email: string | null;
+  phone: string | null;
 }
 
 export interface PetSummary {
@@ -16,6 +17,6 @@ export interface PetSummary {
   birthDate: string | null;
   sex: PetSex;
   photoUrl: string | null;
-  owner: PetOwner;
+  client: PetClient;
   createdAt: string;
 }

@@ -38,7 +38,7 @@ export class ReportsService {
     const pet = await this.prisma.pet.findUnique({
       where: { id: petId },
       include: {
-        owner: { select: { firstName: true, lastName: true } },
+        client: { select: { firstName: true, lastName: true } },
         record: {
           include: {
             consultations: {
@@ -105,7 +105,7 @@ export class ReportsService {
               [{ text: 'Raza', bold: true }, pet.breed ?? '—'],
               [{ text: 'Sexo', bold: true }, pet.sex === 'FEMALE' ? 'Hembra' : 'Macho'],
               [{ text: 'Edad', bold: true }, age],
-              [{ text: 'Dueño', bold: true }, `${pet.owner.firstName} ${pet.owner.lastName}`],
+              [{ text: 'Dueño', bold: true }, `${pet.client.firstName} ${pet.client.lastName}`],
             ],
           },
           layout: 'lightHorizontalLines',

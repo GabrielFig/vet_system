@@ -64,15 +64,18 @@ async function main() {
     create: { clinicId: mininosClinic.id, userId: mininosDoctor.id, role: Role.DOCTOR },
   });
 
-  const owner = await prisma.user.upsert({
-    where: { email: 'owner@demo.com' },
+  // Client (pet owner) — no system login
+  const anaClient = await prisma.client.upsert({
+    where: { id: 'seed-client-ana-rodriguez-000000001' },
     update: {},
-    create: { email: 'owner@demo.com', passwordHash: await hash('Owner1234!'), firstName: 'Ana', lastName: 'Rodríguez' },
-  });
-  await prisma.clinicUser.upsert({
-    where: { clinicId_userId: { clinicId: canesClinic.id, userId: owner.id } },
-    update: {},
-    create: { clinicId: canesClinic.id, userId: owner.id, role: Role.OWNER },
+    create: {
+      id: 'seed-client-ana-rodriguez-000000001',
+      clinicId: canesClinic.id,
+      firstName: 'Ana',
+      lastName: 'Rodríguez',
+      phone: '+52 55 1234 5678',
+      email: 'ana.rodriguez@email.com',
+    },
   });
 
   const luna = await prisma.pet.upsert({
@@ -80,7 +83,7 @@ async function main() {
     update: {},
     create: {
       id: 'seed-luna-pet-id-00000000000000000001',
-      ownerId: owner.id,
+      clientId: anaClient.id,
       name: 'Luna',
       species: 'dog',
       breed: 'Labrador',
@@ -182,7 +185,7 @@ async function main() {
     update: {},
     create: {
       id: 'seed-michi-pet-id-00000000000000000002',
-      ownerId: owner.id,
+      clientId: anaClient.id,
       name: 'Michi',
       species: 'cat',
       breed: 'Siamés',
@@ -204,7 +207,9 @@ async function main() {
   console.log('  doctor@canes.com   / Doctor1234! (DOCTOR en Canes Vet)');
   console.log('  admin@mininos.com  / Admin1234!  (ADMIN  en Mininos Vet)');
   console.log('  doctor@mininos.com / Doctor1234! (DOCTOR en Mininos Vet)');
-  console.log('  owner@demo.com     / Owner1234!  (OWNER  en Canes Vet)');
+  console.log('');
+  console.log('Clientes demo:');
+  console.log('  Ana Rodríguez — Luna (Labrador) + Michi (Siamés) en Canes Vet');
 }
 
 main()

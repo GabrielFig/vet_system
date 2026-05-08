@@ -17,7 +17,7 @@ interface PetDetail {
   sex: string;
   birthDate: string | null;
   photoUrl: string | null;
-  owner: { id: string; firstName: string; lastName: string; email: string };
+  client: { id: string; firstName: string; lastName: string; email: string | null; phone: string | null };
   record: { id: string; publicUuid: string; isPublic: boolean } | null;
 }
 
@@ -139,7 +139,8 @@ export default function PetDetailPage() {
             </p>
             <div className="flex items-center gap-1.5 text-gray-400 text-xs mt-1.5">
               <UserIcon />
-              <span>{pet.owner.firstName} {pet.owner.lastName}</span>
+              <span>{pet.client.firstName} {pet.client.lastName}</span>
+              {pet.client.phone && <span className="ml-2 text-gray-400">· {pet.client.phone}</span>}
             </div>
           </div>
         </div>

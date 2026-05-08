@@ -13,12 +13,14 @@ import { PublicModule } from './public/public.module';
 import { AppointmentsModule } from './appointments/appointments.module';
 import { InventoryModule } from './inventory/inventory.module';
 import { ReportsModule } from './reports/reports.module';
+import { ClientsModule } from './clients/clients.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env' }),
     ThrottlerModule.forRoot([{ ttl: 60000, limit: 100 }]),
     AuthModule,
+    ClientsModule,
     PetsModule,
     MedicalRecordsModule,
     PublicModule,
