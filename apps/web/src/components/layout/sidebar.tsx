@@ -113,22 +113,29 @@ const navItems = [
   { label: 'Clientes', href: '/clients', icon: UsersIcon },
   { label: 'Mascotas', href: '/pets', icon: PawIcon },
   { label: 'Citas', href: '/appointments', icon: CalendarIcon },
-  { label: 'Inventario', href: '/inventory', icon: BoxIcon, requiredPlan: 'PRO' as const },
-  { label: 'Reportes', href: '/reports', icon: ChartIcon, adminOnly: true, requiredPlan: 'PRO' as const },
+  { label: 'Inventario', href: '/inventory', icon: BoxIcon, requiredModule: 'INVENTORY' },
+  { label: 'Reportes', href: '/reports', icon: ChartIcon, adminOnly: true, requiredModule: 'REPORTS' },
 ];
 
-const PLAN_LABELS: Record<string, string> = { PRO: 'Pro', ENTERPRISE: 'Enterprise' };
+function ShieldIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+    </svg>
+  );
+}
 
 export function Sidebar() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
   const { user, clinic, role, clearAuth } = useAuthStore();
-  const { planType, planLabel, canUseInventory, canUseReports } = usePlan();
+  const { planType, planLabel, canUseInventory, canUseReports, isSuperAdmin } = usePlan();
 
-  function isPlanLocked(requiredPlan?: string): boolean {
-    if (!requiredPlan) return false;
-    if (requiredPlan === 'PRO' && !canUseInventory) return true;
+  function isModuleLocked(requiredModule?: string): boolean {
+    if (!requiredModule) return false;
+    if (requiredModule === 'INVENTORY') return !canUseInventory;
+    if (requiredModule === 'REPORTS') return !canUseReports;
     return false;
   }
 
@@ -188,21 +195,21 @@ export function Sidebar() {
           {navItems
             .filter((item) => !item.adminOnly || role === 'ADMIN')
             .map((item) => {
-              const locked = isPlanLocked(item.requiredPlan);
+              const locked = isModuleLocked(item.requiredModule);
               const isActive = !locked && (pathname === item.href || pathname.startsWith(item.href + '/'));
 
               if (locked) {
                 return (
                   <div
                     key={item.href}
-                    title={`Solo en plan ${PLAN_LABELS[item.requiredPlan ?? ''] ?? item.requiredPlan}`}
+                    title="Módulo no habilitado — contacta a soporte para activarlo"
                     className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-vet-600 cursor-not-allowed select-none"
                   >
                     <item.icon />
                     <span className="flex-1">{item.label}</span>
-                    <span className="text-[10px] bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded px-1.5 py-0.5 font-semibold leading-none">
-                      {PLAN_LABELS[item.requiredPlan ?? ''] ?? item.requiredPlan}
-                    </span>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-vet-600 flex-shrink-0">
+                      <rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                    </svg>
                   </div>
                 );
               }
@@ -223,6 +230,25 @@ export function Sidebar() {
                 </Link>
               );
             })}
+
+          {/* Super admin link */}
+          {isSuperAdmin && (
+            <>
+              <div className="border-t border-vet-700 my-2" />
+              <Link
+                href="/admin/clinics"
+                onClick={() => setOpen(false)}
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 cursor-pointer text-sm font-medium
+                  ${pathname.startsWith('/admin')
+                    ? 'bg-purple-700/60 text-purple-200 border-l-2 border-purple-400'
+                    : 'text-purple-300 hover:bg-purple-700/30 hover:text-purple-100'
+                  }`}
+              >
+                <ShieldIcon />
+                Panel Admin
+              </Link>
+            </>
+          )}
         </nav>
 
         {/* Footer */}

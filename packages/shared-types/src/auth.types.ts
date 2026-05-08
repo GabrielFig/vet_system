@@ -9,12 +9,19 @@ export enum PlanType {
   ENTERPRISE = 'ENTERPRISE',
 }
 
+export enum ClinicModuleType {
+  INVENTORY = 'INVENTORY',
+  REPORTS = 'REPORTS',
+}
+
 export interface JwtPayload {
   sub: string;
   clinicId: string;
   role: Role;
   email: string;
   planType: PlanType;
+  modules: ClinicModuleType[];
+  isSuperAdmin: boolean;
 }
 
 export interface AuthUser {

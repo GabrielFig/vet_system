@@ -1,57 +1,98 @@
-import { PrismaClient, Role, PlanType, PetSex } from '@prisma/client';
+import { PrismaClient, Role, PlanType, PetSex, ClinicModuleType } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
+
+const PLAN_MODULES: Record<PlanType, ClinicModuleType[]> = {
+  BASIC: [],
+  PRO: [ClinicModuleType.INVENTORY, ClinicModuleType.REPORTS],
+  ENTERPRISE: [ClinicModuleType.INVENTORY, ClinicModuleType.REPORTS],
+};
+
+async function upsertClinicWithModules(data: { slug: string; name: string; licenseKey: string; planType: PlanType }) {
+  const clinic = await prisma.clinic.upsert({
+    where: { slug: data.slug },
+    update: {},
+    create: { name: data.name, slug: data.slug, licenseKey: data.licenseKey, planType: data.planType },
+  });
+  // Ensure modules match the plan (idempotent)
+  for (const mod of PLAN_MODULES[data.planType]) {
+    await prisma.clinicModule.upsert({
+      where: { clinicId_module: { clinicId: clinic.id, module: mod } },
+      create: { clinicId: clinic.id, module: mod },
+      update: {},
+    });
+  }
+  return clinic;
+}
 
 async function main() {
   console.log('🌱 Seeding database...');
 
   const hash = (pw: string) => bcrypt.hash(pw, 12);
 
+  // ── Super Admin ───────────────────────────────────────────────────────────
+
+  const superAdmin = await prisma.user.upsert({
+    where: { email: 'superadmin@vetsystem.com' },
+    update: { isSuperAdmin: true },
+    create: {
+      email: 'superadmin@vetsystem.com',
+      passwordHash: await hash('SuperAdmin1234!'),
+      firstName: 'Super',
+      lastName: 'Admin',
+      isSuperAdmin: true,
+    },
+  });
+
   // ── Clinics ───────────────────────────────────────────────────────────────
 
-  const basicClinic = await prisma.clinic.upsert({
-    where: { slug: 'petcare-basico' },
-    update: {},
-    create: { name: 'PetCare Básico', slug: 'petcare-basico', licenseKey: 'BASIC-2026-LICENSE', planType: PlanType.BASIC },
+  const basicClinic = await upsertClinicWithModules({
+    slug: 'petcare-basico',
+    name: 'PetCare Básico',
+    licenseKey: 'BASIC-2026-LICENSE',
+    planType: PlanType.BASIC,
   });
 
-  const proClinic = await prisma.clinic.upsert({
-    where: { slug: 'canes' },
-    update: {},
-    create: { name: 'Canes Vet', slug: 'canes', licenseKey: 'CANES-2026-LICENSE', planType: PlanType.PRO },
+  const proClinic = await upsertClinicWithModules({
+    slug: 'canes',
+    name: 'Canes Vet',
+    licenseKey: 'CANES-2026-LICENSE',
+    planType: PlanType.PRO,
   });
 
-  const enterpriseClinic = await prisma.clinic.upsert({
-    where: { slug: 'elite-animal' },
-    update: {},
-    create: { name: 'Elite Animal Hospital', slug: 'elite-animal', licenseKey: 'ELITE-2026-LICENSE', planType: PlanType.ENTERPRISE },
+  const enterpriseClinic = await upsertClinicWithModules({
+    slug: 'elite-animal',
+    name: 'Elite Animal Hospital',
+    licenseKey: 'ELITE-2026-LICENSE',
+    planType: PlanType.ENTERPRISE,
   });
 
   // ── Users ─────────────────────────────────────────────────────────────────
 
-  // BASIC
-  const basicAdmin = await prisma.user.upsert({
-    where: { email: 'admin@basic.com' },
-    update: {},
-    create: { email: 'admin@basic.com', passwordHash: await hash('Admin1234!'), firstName: 'María', lastName: 'Torres' },
-  });
+  // Super admin también pertenece a Canes para poder usar el sistema
   await prisma.clinicUser.upsert({
-    where: { clinicId_userId: { clinicId: basicClinic.id, userId: basicAdmin.id } },
+    where: { clinicId_userId: { clinicId: proClinic.id, userId: superAdmin.id } },
     update: {},
-    create: { clinicId: basicClinic.id, userId: basicAdmin.id, role: Role.ADMIN },
+    create: { clinicId: proClinic.id, userId: superAdmin.id, role: Role.ADMIN },
   });
 
-  const basicDoctor = await prisma.user.upsert({
-    where: { email: 'doctor@basic.com' },
-    update: {},
-    create: { email: 'doctor@basic.com', passwordHash: await hash('Doctor1234!'), firstName: 'Luis', lastName: 'Ramírez' },
-  });
-  await prisma.clinicUser.upsert({
-    where: { clinicId_userId: { clinicId: basicClinic.id, userId: basicDoctor.id } },
-    update: {},
-    create: { clinicId: basicClinic.id, userId: basicDoctor.id, role: Role.DOCTOR },
-  });
+  // BASIC
+  for (const [email, firstName, lastName, role] of [
+    ['admin@basic.com', 'María', 'Torres', Role.ADMIN],
+    ['doctor@basic.com', 'Luis', 'Ramírez', Role.DOCTOR],
+  ] as const) {
+    const u = await prisma.user.upsert({
+      where: { email },
+      update: {},
+      create: { email, passwordHash: await hash(role === Role.ADMIN ? 'Admin1234!' : 'Doctor1234!'), firstName, lastName },
+    });
+    await prisma.clinicUser.upsert({
+      where: { clinicId_userId: { clinicId: basicClinic.id, userId: u.id } },
+      update: {},
+      create: { clinicId: basicClinic.id, userId: u.id, role },
+    });
+  }
 
   // PRO
   const proAdmin = await prisma.user.upsert({
@@ -77,27 +118,21 @@ async function main() {
   });
 
   // ENTERPRISE
-  const enterpriseAdmin = await prisma.user.upsert({
-    where: { email: 'admin@elite.com' },
-    update: {},
-    create: { email: 'admin@elite.com', passwordHash: await hash('Admin1234!'), firstName: 'Valentina', lastName: 'Herrera' },
-  });
-  await prisma.clinicUser.upsert({
-    where: { clinicId_userId: { clinicId: enterpriseClinic.id, userId: enterpriseAdmin.id } },
-    update: {},
-    create: { clinicId: enterpriseClinic.id, userId: enterpriseAdmin.id, role: Role.ADMIN },
-  });
-
-  const enterpriseDoctor = await prisma.user.upsert({
-    where: { email: 'doctor@elite.com' },
-    update: {},
-    create: { email: 'doctor@elite.com', passwordHash: await hash('Doctor1234!'), firstName: 'Andrés', lastName: 'Morales' },
-  });
-  await prisma.clinicUser.upsert({
-    where: { clinicId_userId: { clinicId: enterpriseClinic.id, userId: enterpriseDoctor.id } },
-    update: {},
-    create: { clinicId: enterpriseClinic.id, userId: enterpriseDoctor.id, role: Role.DOCTOR },
-  });
+  for (const [email, firstName, lastName, role] of [
+    ['admin@elite.com', 'Valentina', 'Herrera', Role.ADMIN],
+    ['doctor@elite.com', 'Andrés', 'Morales', Role.DOCTOR],
+  ] as const) {
+    const u = await prisma.user.upsert({
+      where: { email },
+      update: {},
+      create: { email, passwordHash: await hash(role === Role.ADMIN ? 'Admin1234!' : 'Doctor1234!'), firstName, lastName },
+    });
+    await prisma.clinicUser.upsert({
+      where: { clinicId_userId: { clinicId: enterpriseClinic.id, userId: u.id } },
+      update: {},
+      create: { clinicId: enterpriseClinic.id, userId: u.id, role },
+    });
+  }
 
   // ── Clients & Pets ────────────────────────────────────────────────────────
 
@@ -211,21 +246,20 @@ async function main() {
 
   console.log('✅ Seed completo.\n');
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+  console.log('  🔑 Super Admin (acceso al panel /admin)');
+  console.log('    superadmin@vetsystem.com / SuperAdmin1234!  (también en Canes Vet)');
+  console.log('');
   console.log('  Plan BASIC  — PetCare Básico');
-  console.log('    admin@basic.com    / Admin1234!  (ADMIN)');
-  console.log('    doctor@basic.com   / Doctor1234! (DOCTOR)');
-  console.log('    Acceso: Clientes, Mascotas, Citas, Historial médico');
-  console.log('    Bloqueado: Inventario, Reportes');
+  console.log('    admin@basic.com    / Admin1234!  | doctor@basic.com / Doctor1234!');
+  console.log('    Módulos: ninguno extra  |  Bloqueado: Inventario, Reportes');
   console.log('');
   console.log('  Plan PRO    — Canes Vet');
-  console.log('    admin@canes.com    / Admin1234!  (ADMIN)');
-  console.log('    doctor@canes.com   / Doctor1234! (DOCTOR)');
-  console.log('    Acceso: Todo BASIC + Inventario + Reportes de citas');
+  console.log('    admin@canes.com    / Admin1234!  | doctor@canes.com / Doctor1234!');
+  console.log('    Módulos: INVENTORY, REPORTS');
   console.log('');
   console.log('  Plan ENTERPRISE — Elite Animal Hospital');
-  console.log('    admin@elite.com    / Admin1234!  (ADMIN)');
-  console.log('    doctor@elite.com   / Doctor1234! (DOCTOR)');
-  console.log('    Acceso: Todo PRO + features premium (acceso completo)');
+  console.log('    admin@elite.com    / Admin1234!  | doctor@elite.com / Doctor1234!');
+  console.log('    Módulos: INVENTORY, REPORTS');
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 }
 

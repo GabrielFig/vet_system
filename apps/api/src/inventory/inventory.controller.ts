@@ -8,10 +8,10 @@ import { UpdateProductDto } from './dto/update-product.dto';
 import { CreateMovementDto } from './dto/create-movement.dto';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { Roles } from '../common/decorators/roles.decorator';
-import { RequiresPlan } from '../common/decorators/requires-plan.decorator';
-import { JwtPayload, Role, PlanType } from '@vet/shared-types';
+import { RequiresModule } from '../common/decorators/requires-module.decorator';
+import { JwtPayload, Role, ClinicModuleType } from '@vet/shared-types';
 
-@RequiresPlan(PlanType.PRO)
+@RequiresModule(ClinicModuleType.INVENTORY)
 @Controller()
 export class InventoryController {
   constructor(private service: InventoryService) {}

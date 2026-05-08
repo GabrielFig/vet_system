@@ -8,6 +8,8 @@ interface AuthState {
   user: AuthUser | null;
   clinic: AuthClinic | null;
   role: Role | null;
+  modules: string[];
+  isSuperAdmin: boolean;
   _hasHydrated: boolean;
   setAuth: (data: {
     accessToken: string;
@@ -22,6 +24,15 @@ interface AuthState {
   setHasHydrated: (v: boolean) => void;
 }
 
+function decodeJwtModules(token: string): { modules: string[]; isSuperAdmin: boolean } {
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    return { modules: payload.modules ?? [], isSuperAdmin: payload.isSuperAdmin ?? false };
+  } catch {
+    return { modules: [], isSuperAdmin: false };
+  }
+}
+
 export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
@@ -30,19 +41,31 @@ export const useAuthStore = create<AuthState>()(
       user: null,
       clinic: null,
       role: null,
+      modules: [],
+      isSuperAdmin: false,
       _hasHydrated: false,
-      setAuth: (data) =>
+      setAuth: (data) => {
+        const { modules, isSuperAdmin } = decodeJwtModules(data.accessToken);
         set({
           accessToken: data.accessToken,
           refreshToken: data.refreshToken,
           user: data.user,
           clinic: data.clinic,
           role: data.role,
-        }),
+          modules,
+          isSuperAdmin,
+        });
+      },
       clearAuth: () =>
-        set({ accessToken: null, refreshToken: null, user: null, clinic: null, role: null }),
-      updateAccessToken: (token) => set({ accessToken: token }),
-      updateTokens: (accessToken, refreshToken) => set({ accessToken, refreshToken }),
+        set({ accessToken: null, refreshToken: null, user: null, clinic: null, role: null, modules: [], isSuperAdmin: false }),
+      updateAccessToken: (token) => {
+        const { modules, isSuperAdmin } = decodeJwtModules(token);
+        set({ accessToken: token, modules, isSuperAdmin });
+      },
+      updateTokens: (accessToken, refreshToken) => {
+        const { modules, isSuperAdmin } = decodeJwtModules(accessToken);
+        set({ accessToken, refreshToken, modules, isSuperAdmin });
+      },
       setHasHydrated: (v) => set({ _hasHydrated: v }),
     }),
     {

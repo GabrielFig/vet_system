@@ -5,7 +5,7 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { PrismaService } from './prisma/prisma.service';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
-import { PlanGuard } from './common/guards/plan.guard';
+import { ModuleGuard } from './common/guards/module.guard';
 import { TenantInterceptor } from './common/interceptors/tenant.interceptor';
 import { AuthModule } from './auth/auth.module';
 import { PetsModule } from './pets/pets.module';
@@ -15,12 +15,14 @@ import { AppointmentsModule } from './appointments/appointments.module';
 import { InventoryModule } from './inventory/inventory.module';
 import { ReportsModule } from './reports/reports.module';
 import { ClientsModule } from './clients/clients.module';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env' }),
     ThrottlerModule.forRoot([{ ttl: 60000, limit: 100 }]),
     AuthModule,
+    AdminModule,
     ClientsModule,
     PetsModule,
     MedicalRecordsModule,
@@ -34,7 +36,7 @@ import { ClientsModule } from './clients/clients.module';
     { provide: APP_GUARD, useClass: ThrottlerGuard },
     { provide: APP_GUARD, useClass: JwtAuthGuard },
     { provide: APP_GUARD, useClass: RolesGuard },
-    { provide: APP_GUARD, useClass: PlanGuard },
+    { provide: APP_GUARD, useClass: ModuleGuard },
     { provide: APP_INTERCEPTOR, useClass: TenantInterceptor },
   ],
   exports: [PrismaService],

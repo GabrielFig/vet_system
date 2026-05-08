@@ -15,6 +15,7 @@ import {
   LoginResult,
   Role,
   PlanType,
+  ClinicModuleType,
 } from '@vet/shared-types';
 import { LoginDto } from './dto/login.dto';
 import { SelectClinicDto } from './dto/select-clinic.dto';
@@ -42,7 +43,7 @@ export class AuthService {
 
     const clinicUsers = await this.prisma.clinicUser.findMany({
       where: { userId: user.id, isActive: true },
-      include: { clinic: true },
+      include: { clinic: { include: { modules: true } } },
     });
 
     if (clinicUsers.length === 0) {
@@ -85,7 +86,7 @@ export class AuthService {
 
     const clinicUser = await this.prisma.clinicUser.findUnique({
       where: { clinicId_userId: { clinicId: dto.clinicId, userId: payload.sub } },
-      include: { user: true, clinic: true },
+      include: { user: true, clinic: { include: { modules: true } } },
     });
 
     if (!clinicUser || !clinicUser.isActive) {
@@ -123,8 +124,8 @@ export class AuthService {
   }
 
   private buildAuthResponse(
-    user: { id: string; email: string; firstName: string; lastName: string },
-    clinic: { id: string; name: string; slug: string; planType: string },
+    user: { id: string; email: string; firstName: string; lastName: string; isSuperAdmin: boolean },
+    clinic: { id: string; name: string; slug: string; planType: string; modules: { module: string }[] },
     role: Role,
   ): AuthResponse {
     const jwtPayload: JwtPayload = {
@@ -133,6 +134,8 @@ export class AuthService {
       role,
       email: user.email,
       planType: clinic.planType as PlanType,
+      modules: clinic.modules.map((m) => m.module as ClinicModuleType),
+      isSuperAdmin: user.isSuperAdmin,
     };
 
     const accessToken = this.signAccess(jwtPayload);

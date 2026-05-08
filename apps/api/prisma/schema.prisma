@@ -19,6 +19,11 @@ enum PlanType {
   ENTERPRISE
 }
 
+enum ClinicModuleType {
+  INVENTORY
+  REPORTS
+}
+
 enum PetSex {
   MALE
   FEMALE
@@ -35,6 +40,7 @@ model User {
   phone                 String?
   avatarUrl             String?
   isActive              Boolean         @default(true)
+  isSuperAdmin          Boolean         @default(false)
   createdAt             DateTime        @default(now())
   clinics               ClinicUser[]
   consultationsAsDoctor Consultation[]  @relation("ConsultationDoctor")
@@ -117,16 +123,27 @@ model Consultation {
 // ── ENTIDADES DE TENANT ───────────────────────────────────
 
 model Clinic {
-  id         String       @id @default(uuid())
+  id         String         @id @default(uuid())
   name       String
-  slug       String       @unique
-  licenseKey String       @unique
-  planType   PlanType     @default(BASIC)
+  slug       String         @unique
+  licenseKey String         @unique
+  planType   PlanType       @default(BASIC)
   logoUrl    String?
-  isActive   Boolean      @default(true)
-  createdAt  DateTime     @default(now())
-  updatedAt  DateTime     @updatedAt
+  isActive   Boolean        @default(true)
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
   users      ClinicUser[]
+  modules    ClinicModule[]
+}
+
+model ClinicModule {
+  clinicId  String
+  module    ClinicModuleType
+  enabledAt DateTime         @default(now())
+  clinic    Clinic           @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+
+  @@id([clinicId, module])
+  @@index([clinicId])
 }
 
 model ClinicUser {
