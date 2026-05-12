@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VetSystem — Propuesta</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@700;800&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --vet-50:  #f0fdf4;
+      --vet-100: #dcfce7;
+      --vet-500: #22c55e;
+      --vet-600: #16a34a;
+      --vet-700: #15803d;
+      --vet-800: #166534;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #fff;
+      color: #1a2e1a;
+      width: 210mm;
+      min-height: 297mm;
+      margin: 0 auto;
+      padding: 14mm 16mm 14mm 16mm;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    /* ── Header ── */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 14px;
+      border-bottom: 2px solid var(--vet-500);
+      margin-bottom: 22px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-icon {
+      width: 42px;
+      height: 42px;
+      background: var(--vet-500);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .logo-text {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--vet-800);
+      letter-spacing: -0.5px;
+    }
+
+    .logo-sub {
+      font-size: 11px;
+      color: #6b7280;
+      font-weight: 500;
+      margin-top: 1px;
+    }
+
+    .header-date {
+      font-size: 11px;
+      color: #9ca3af;
+      text-align: right;
+    }
+
+    /* ── Hero ── */
+    .hero {
+      background: linear-gradient(135deg, var(--vet-800) 0%, var(--vet-600) 100%);
+      border-radius: 14px;
+      padding: 22px 26px;
+      color: #fff;
+      margin-bottom: 22px;
+    }
+
+    .hero h1 {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 21px;
+      font-weight: 800;
+      margin-bottom: 6px;
+      letter-spacing: -0.3px;
+    }
+
+    .hero p {
+      font-size: 13px;
+      opacity: 0.88;
+      max-width: 480px;
+      line-height: 1.6;
+    }
+
+    .hero-badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.18);
+      border: 1px solid rgba(255,255,255,0.3);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 99px;
+      margin-bottom: 10px;
+      letter-spacing: 0.3px;
+    }
+
+    /* ── Section title ── */
+    .section-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--vet-600);
+      margin-bottom: 10px;
+    }
+
+    /* ── Features grid ── */
+    .features {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 22px;
+    }
+
+    .feature-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      background: var(--vet-50);
+      border: 1px solid var(--vet-100);
+      border-radius: 10px;
+      padding: 12px 14px;
+    }
+
+    .feature-icon {
+      width: 32px;
+      height: 32px;
+      background: var(--vet-100);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      color: var(--vet-700);
+    }
+
+    .feature-title {
+      font-weight: 600;
+      font-size: 12.5px;
+      color: var(--vet-800);
+      margin-bottom: 2px;
+    }
+
+    .feature-desc {
+      font-size: 11.5px;
+      color: #6b7280;
+      line-height: 1.4;
+    }
+
+    /* ── Pricing ── */
+    .pricing-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+
+    .price-card {
+      border: 2px solid var(--vet-100);
+      border-radius: 12px;
+      padding: 18px 20px;
+    }
+
+    .price-card.highlight {
+      border-color: var(--vet-500);
+      background: var(--vet-50);
+      position: relative;
+    }
+
+    .price-badge {
+      position: absolute;
+      top: -11px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--vet-500);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 3px 12px;
+      border-radius: 99px;
+      white-space: nowrap;
+      letter-spacing: 0.3px;
+    }
+
+    .price-saving {
+      display: inline-block;
+      background: #fef9c3;
+      color: #854d0e;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 99px;
+      margin-top: 6px;
+    }
+
+    .price-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #9ca3af;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+
+    .price-amount {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--vet-800);
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .price-amount span {
+      font-size: 13px;
+      font-weight: 500;
+      color: #9ca3af;
+    }
+
+    .price-note {
+      font-size: 11.5px;
+      color: #6b7280;
+      margin-top: 8px;
+      line-height: 1.5;
+    }
+
+    .price-note strong {
+      color: var(--vet-700);
+    }
+
+    /* ── Includes ── */
+    .includes {
+      margin-bottom: 22px;
+    }
+
+    .includes-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .include-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: #374151;
+      font-weight: 500;
+    }
+
+    .check {
+      width: 18px;
+      height: 18px;
+      background: var(--vet-500);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    /* ── CTA ── */
+    .cta {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 18px 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .cta-text h3 {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--vet-800);
+      margin-bottom: 4px;
+    }
+
+    .cta-text p {
+      font-size: 12px;
+      color: #6b7280;
+    }
+
+    .cta-contact {
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    .cta-contact p {
+      font-size: 12px;
+      color: #6b7280;
+      margin-bottom: 2px;
+    }
+
+    .cta-contact strong {
+      font-size: 13px;
+      color: var(--vet-800);
+    }
+
+    /* ── Footer ── */
+    .footer {
+      margin-top: 18px;
+      padding-top: 12px;
+      border-top: 1px solid #f3f4f6;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .footer p {
+      font-size: 10.5px;
+      color: #d1d5db;
+    }
+
+    .no-commitment {
+      display: flex;
+      gap: 16px;
+    }
+
+    .no-commitment span {
+      font-size: 10.5px;
+      color: #9ca3af;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    @media print {
+      body { padding: 10mm 14mm; }
+      @page { size: A4; margin: 0; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <div class="header">
+    <div class="logo">
+      <div class="logo-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="4" r="2"/><circle cx="18" cy="8" r="2"/><circle cx="20" cy="16" r="2"/>
+          <path d="M9 10a5 5 0 0 1 5 5v3.5a3.5 3.5 0 0 1-6.84 1.045Q6.52 17.48 4.46 16.84A3.5 3.5 0 0 1 5.5 10Z"/>
+        </svg>
+      </div>
+      <div>
+        <div class="logo-text">VetSystem</div>
+        <div class="logo-sub">Sistema de gestión veterinaria</div>
+      </div>
+    </div>
+    <div class="header-date">
+      <div>Propuesta comercial</div>
+      <div style="margin-top:2px; font-weight:600; color:#6b7280;">Mayo 2026</div>
+    </div>
+  </div>
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-badge">Sistema de gestión todo en uno</div>
+    <h1>Digitaliza tu clínica veterinaria</h1>
+    <p>Gestiona citas, expedientes, inventario y vacunas desde cualquier dispositivo. Tus clientes llevan la cartilla de su mascota en el celular con un código QR.</p>
+  </div>
+
+  <!-- Features -->
+  <div class="section-title">Lo que incluye el sistema</div>
+  <div class="features">
+
+    <div class="feature-item">
+      <div class="feature-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect width="18" height="18" x="3" y="4" rx="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/><line x1="12" x2="12" y1="14" y2="18"/><line x1="10" x2="14" y1="16" y2="16"/>
+        </svg>
+      </div>
+      <div>
+        <div class="feature-title">Agenda de citas</div>
+        <div class="feature-desc">Horarios configurables, slots automáticos y vista del día por veterinario.</div>
+      </div>
+    </div>
+
+    <div class="feature-item">
+      <div class="feature-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect width="8" height="4" x="8" y="2" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+        </svg>
+      </div>
+      <div>
+        <div class="feature-title">Expediente digital</div>
+        <div class="feature-desc">Historial completo por paciente: consultas, notas clínicas y diagnósticos.</div>
+      </div>
+    </div>
+
+    <div class="feature-item">
+      <div class="feature-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect width="5" height="5" x="3" y="3" rx="1"/><rect width="5" height="5" x="16" y="3" rx="1"/><rect width="5" height="5" x="3" y="16" rx="1"/>
+          <path d="M21 16h-3a2 2 0 0 0-2 2v3"/><path d="M21 21v.01"/><path d="M12 7v3a2 2 0 0 1-2 2H7"/><path d="M3 12h.01"/><path d="M12 3h.01"/>
+        </svg>
+      </div>
+      <div>
+        <div class="feature-title">Cartilla con código QR</div>
+        <div class="feature-desc">El dueño escanea el QR y ve la cartilla completa de su mascota desde el celular.</div>
+      </div>
+    </div>
+
+    <div class="feature-item">
+      <div class="feature-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2Z"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+        </svg>
+      </div>
+      <div>
+        <div class="feature-title">Control de inventario</div>
+        <div class="feature-desc">Stock de medicamentos y materiales con descuento automático al atender.</div>
+      </div>
+    </div>
+
+    <div class="feature-item">
+      <div class="feature-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="m18 2 4 4"/><path d="m17 7 3-3"/><path d="M19 9 8.7 19.3c-1 1-2.5 1-3.4 0l-.6-.6c-1-1-1-2.5 0-3.4L15 5"/>
+        </svg>
+      </div>
+      <div>
+        <div class="feature-title">Vacunas y recetas</div>
+        <div class="feature-desc">Registro de vacunación con próxima dosis y emisión de recetas médicas.</div>
+      </div>
+    </div>
+
+    <div class="feature-item">
+      <div class="feature-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect width="14" height="20" x="5" y="2" rx="2"/><path d="M15 2v4"/><path d="M9 2v4"/><path d="M5 10h14"/>
+        </svg>
+      </div>
+      <div>
+        <div class="feature-title">Acceso desde cualquier lugar</div>
+        <div class="feature-desc">Funciona en computadora, tablet y celular. Sin instalaciones.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Pricing -->
+  <div class="section-title">Inversión</div>
+  <div class="pricing-row">
+
+    <div class="price-card">
+      <div class="price-label">Mensual</div>
+      <div class="price-amount">$599 <span>MXN/mes</span></div>
+      <div class="price-note">
+        Usuarios ilimitados.<br/>
+        Todas las funciones incluidas.
+      </div>
+    </div>
+
+    <div class="price-card highlight">
+      <div class="price-badge">MEJOR VALOR</div>
+      <div class="price-label">Anual</div>
+      <div class="price-amount">$4,990 <span>MXN/año</span></div>
+      <div class="price-note">
+        Equivale a $416/mes.<br/>
+        Todas las funciones incluidas.
+      </div>
+      <div class="price-saving">Ahorras $3,398 MXN</div>
+    </div>
+
+  </div>
+
+  <!-- Includes -->
+  <div class="includes">
+    <div class="section-title">Todos los planes incluyen</div>
+    <div class="includes-grid">
+      <div class="include-item">
+        <div class="check">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        Configuración inicial de la clínica
+      </div>
+      <div class="include-item">
+        <div class="check">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        Capacitación al equipo (1 hora)
+      </div>
+      <div class="include-item">
+        <div class="check">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        Soporte por WhatsApp
+      </div>
+      <div class="include-item">
+        <div class="check">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        Carga de datos existentes
+      </div>
+      <div class="include-item">
+        <div class="check">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        Usuarios ilimitados
+      </div>
+      <div class="include-item">
+        <div class="check">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        Actualizaciones incluidas
+      </div>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta">
+    <div class="cta-text">
+      <h3>¿Listos para empezar?</h3>
+      <p>Arrancamos esta semana. La configuración inicial toma menos de 24 horas.</p>
+    </div>
+    <div class="cta-contact">
+      <p>Contáctanos por</p>
+      <strong>WhatsApp</strong>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <p>VetSystem © 2026 · Sistema de gestión veterinaria</p>
+    <div class="no-commitment">
+      <span>
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        Sin permanencia
+      </span>
+      <span>
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        Sin contrato
+      </span>
+      <span>
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        Cancela cuando quieras
+      </span>
+    </div>
+  </div>
+
+</body>
+</html>
