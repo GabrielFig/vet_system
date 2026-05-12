@@ -21,13 +21,13 @@ interface PublicRecord {
     breed: string | null;
     sex: string;
     birthDate: string | null;
-    owner: { firstName: string; lastName: string };
+    client: { firstName: string; lastName: string };
   };
   consultations: PublicConsultation[];
 }
 
 async function getRecord(uuid: string): Promise<PublicRecord | null> {
-  const API_URL = process.env.API_URL ?? 'http://localhost:3001';
+  const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
   try {
     const res = await fetch(`${API_URL}/public/${uuid}`, { cache: 'no-store' });
     if (!res.ok) return null;
@@ -103,7 +103,7 @@ export default async function PublicCartillaPage({ params }: { params: { uuid: s
             {age ? ` · ${age}` : ''}
           </p>
           <p className="text-gray-400 text-sm mt-0.5">
-            Dueño: {pet.owner.firstName} {pet.owner.lastName}
+            Dueño: {pet.client.firstName} {pet.client.lastName}
           </p>
           <div className="mt-3 inline-flex items-center gap-1.5 bg-green-100 text-green-700 text-xs px-3 py-1.5 rounded-full font-medium">
             <CheckIcon />

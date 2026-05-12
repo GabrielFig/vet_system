@@ -10,7 +10,12 @@ export class PublicService {
       where: { publicUuid },
       include: {
         pet: {
-          include: {
+          select: {
+            name: true,
+            species: true,
+            breed: true,
+            sex: true,
+            birthDate: true,
             client: { select: { firstName: true, lastName: true } },
           },
         },
