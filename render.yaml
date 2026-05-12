@@ -34,3 +34,5 @@ services:
         value: /tmp/uploads
       - key: MAX_FILE_SIZE_MB
         value: 10
+      - key: TZ
+        value: America/Mexico_City

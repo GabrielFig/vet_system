@@ -29,10 +29,11 @@ export class AppointmentsService {
   }
 
   async createException(clinicId: string, dto: CreateExceptionDto) {
+    const [ey, em, ed] = dto.date.split('-').map(Number);
     return this.prisma.scheduleException.create({
       data: {
         clinicId,
-        date: new Date(dto.date),
+        date: new Date(ey, em - 1, ed),
         isClosed: dto.isClosed,
         startTime: dto.startTime,
         endTime: dto.endTime,

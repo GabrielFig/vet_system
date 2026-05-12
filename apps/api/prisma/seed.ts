@@ -384,7 +384,9 @@ async function main() {
   // ── Citas ─────────────────────────────────────────────────────────────────
 
   const slot = (date: string, hour: string, minutes = 30) => {
-    const start = new Date(`${date}T${hour}:00.000-06:00`);
+    const [y, mo, d] = date.split('-').map(Number);
+    const [h, m] = hour.split(':').map(Number);
+    const start = new Date(y, mo - 1, d, h, m, 0, 0);
     const end = new Date(start.getTime() + minutes * 60_000);
     return { startsAt: start, endsAt: end };
   };
