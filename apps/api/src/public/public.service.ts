@@ -16,6 +16,7 @@ export class PublicService {
             breed: true,
             sex: true,
             birthDate: true,
+            weight: true,
             client: { select: { firstName: true, lastName: true } },
           },
         },

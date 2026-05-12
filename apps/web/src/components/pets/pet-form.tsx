@@ -37,6 +37,7 @@ export function PetForm({ onSuccess, onCancel, initialClientId, initialClientNam
   const [breed, setBreed] = useState('');
   const [sex, setSex] = useState('male');
   const [birthDate, setBirthDate] = useState('');
+  const [weight, setWeight] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -86,7 +87,7 @@ export function PetForm({ onSuccess, onCancel, initialClientId, initialClientNam
       const pet = await apiFetch<PetSummary>('/pets', {
         method: 'POST',
         token: token ?? undefined,
-        body: { clientId: selectedClientId, name, species, breed: breed || undefined, sex, birthDate: birthDate || undefined },
+        body: { clientId: selectedClientId, name, species, breed: breed || undefined, sex, birthDate: birthDate || undefined, weight: weight ? parseFloat(weight) : undefined },
       });
       onSuccess(pet);
     } catch (err) {
@@ -215,9 +216,15 @@ export function PetForm({ onSuccess, onCancel, initialClientId, initialClientNam
         <input value={breed} onChange={(e) => setBreed(e.target.value)} placeholder="Opcional" className={inputClass} />
       </div>
 
-      <div>
-        <label className={labelClass}>Fecha de nacimiento</label>
-        <input type="date" value={birthDate} onChange={(e) => setBirthDate(e.target.value)} className={inputClass} />
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className={labelClass}>Fecha de nacimiento</label>
+          <input type="date" value={birthDate} onChange={(e) => setBirthDate(e.target.value)} className={inputClass} />
+        </div>
+        <div>
+          <label className={labelClass}>Peso (kg)</label>
+          <input type="number" min="0" step="0.1" value={weight} onChange={(e) => setWeight(e.target.value)} placeholder="Ej. 4.5" className={inputClass} />
+        </div>
       </div>
 
       <div className="flex gap-3 pt-2">

@@ -16,6 +16,7 @@ export interface PetSummary {
   breed: string | null;
   birthDate: string | null;
   sex: PetSex;
+  weight: number | null;
   photoUrl: string | null;
   client: PetClient;
   createdAt: string;

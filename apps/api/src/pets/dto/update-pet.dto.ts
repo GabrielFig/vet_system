@@ -1,4 +1,4 @@
-import { IsOptional, IsString, IsEnum, IsISO8601 } from 'class-validator';
+import { IsOptional, IsString, IsEnum, IsISO8601, IsNumber, Min } from 'class-validator';
 
 export class UpdatePetDto {
   @IsOptional()
@@ -24,4 +24,9 @@ export class UpdatePetDto {
   @IsOptional()
   @IsString()
   photoUrl?: string;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  weight?: number;
 }

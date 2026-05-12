@@ -21,6 +21,7 @@ interface PublicRecord {
     breed: string | null;
     sex: string;
     birthDate: string | null;
+    weight: number | null;
     client: { firstName: string; lastName: string };
   };
   consultations: PublicConsultation[];
@@ -101,6 +102,7 @@ export default async function PublicCartillaPage({ params }: { params: { uuid: s
           <p className="text-gray-500 text-sm mt-1">
             {pet.breed ?? pet.species} · {pet.sex === 'female' || pet.sex === 'FEMALE' ? 'Hembra' : 'Macho'}
             {age ? ` · ${age}` : ''}
+            {pet.weight != null ? ` · ${pet.weight} kg` : ''}
           </p>
           <p className="text-gray-400 text-sm mt-0.5">
             Dueño: {pet.client.firstName} {pet.client.lastName}

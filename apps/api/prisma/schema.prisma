@@ -77,6 +77,7 @@ model Pet {
   breed     String?
   birthDate DateTime?
   sex       PetSex
+  weight    Float?
   photoUrl  String?
   createdAt DateTime       @default(now())
   updatedAt DateTime       @updatedAt

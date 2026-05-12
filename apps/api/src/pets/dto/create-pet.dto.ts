@@ -1,4 +1,4 @@
-import { IsString, IsEnum, IsOptional, IsISO8601, IsUUID } from 'class-validator';
+import { IsString, IsEnum, IsOptional, IsISO8601, IsUUID, IsNumber, Min } from 'class-validator';
 
 export class CreatePetDto {
   @IsUUID()
@@ -20,4 +20,9 @@ export class CreatePetDto {
 
   @IsEnum(['male', 'female', 'MALE', 'FEMALE'])
   sex: string;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  weight?: number;
 }

@@ -56,6 +56,7 @@ export class PetsService {
           breed: dto.breed,
           birthDate: dto.birthDate ? new Date(dto.birthDate) : undefined,
           sex: toDbSex(dto.sex),
+          weight: dto.weight,
         },
         include: { client: { select: clientSelect } },
       });
@@ -75,6 +76,7 @@ export class PetsService {
         birthDate: dto.birthDate ? new Date(dto.birthDate) : undefined,
         sex: dto.sex ? toDbSex(dto.sex) : undefined,
         photoUrl: dto.photoUrl,
+        weight: dto.weight,
       },
       include: { client: { select: clientSelect } },
     });

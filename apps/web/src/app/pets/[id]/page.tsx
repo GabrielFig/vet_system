@@ -16,6 +16,7 @@ interface PetDetail {
   breed: string | null;
   sex: string;
   birthDate: string | null;
+  weight: number | null;
   photoUrl: string | null;
   client: { id: string; firstName: string; lastName: string; email: string | null; phone: string | null };
   record: { id: string; publicUuid: string; isPublic: boolean } | null;
@@ -136,6 +137,7 @@ export default function PetDetailPage() {
             <h1 className="font-heading text-2xl font-bold text-vet-800">{pet.name}</h1>
             <p className="text-gray-500 text-sm mt-1">
               {pet.breed ?? pet.species} · {pet.sex === 'female' || pet.sex === 'FEMALE' ? 'Hembra' : 'Macho'} · {age}
+              {pet.weight != null ? ` · ${pet.weight} kg` : ''}
             </p>
             <div className="flex items-center gap-1.5 text-gray-400 text-xs mt-1.5">
               <UserIcon />
