@@ -10,8 +10,10 @@ services:
       npx prisma generate --schema=apps/api/prisma/schema.prisma &&
       cd apps/api && npx nest build
     startCommand: >-
-      npx prisma migrate deploy --schema=apps/api/prisma/schema.prisma &&
-      node apps/api/dist/main
+      cd apps/api &&
+      npx prisma migrate deploy &&
+      npx prisma db seed &&
+      node dist/main
     healthCheckPath: /health
     envVars:
       - key: DATABASE_URL
