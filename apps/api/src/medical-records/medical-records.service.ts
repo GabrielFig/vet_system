@@ -7,9 +7,9 @@ import { SearchHistoryDto } from './dto/search-history.dto';
 export class MedicalRecordsService {
   constructor(private prisma: PrismaService) {}
 
-  async findOne(recordId: string) {
-    const record = await this.prisma.medicalRecord.findUnique({
-      where: { id: recordId },
+  async findOne(recordId: string, clinicId: string) {
+    const record = await this.prisma.medicalRecord.findFirst({
+      where: { id: recordId, pet: { client: { clinicId } } },
       include: {
         pet: { include: { client: { select: { id: true, firstName: true, lastName: true, email: true, phone: true } } } },
         consultations: {
@@ -36,10 +36,10 @@ export class MedicalRecordsService {
     });
   }
 
-  async searchNotes(recordId: string, dto: SearchHistoryDto) {
+  async searchNotes(recordId: string, clinicId: string, dto: SearchHistoryDto) {
     return this.prisma.medicalNote.findMany({
       where: {
-        consultation: { recordId },
+        consultation: { recordId, record: { pet: { client: { clinicId } } } },
         ...(dto.q ? {
           OR: [
             { title: { contains: dto.q, mode: 'insensitive' } },
@@ -58,10 +58,10 @@ export class MedicalRecordsService {
     });
   }
 
-  async searchPrescriptions(recordId: string, dto: SearchHistoryDto) {
+  async searchPrescriptions(recordId: string, clinicId: string, dto: SearchHistoryDto) {
     return this.prisma.prescription.findMany({
       where: {
-        consultation: { recordId },
+        consultation: { recordId, record: { pet: { client: { clinicId } } } },
         ...(dto.q ? {
           OR: [
             { diagnosis: { contains: dto.q, mode: 'insensitive' } },
@@ -79,10 +79,10 @@ export class MedicalRecordsService {
     });
   }
 
-  async searchVaccinations(recordId: string, dto: SearchHistoryDto) {
+  async searchVaccinations(recordId: string, clinicId: string, dto: SearchHistoryDto) {
     return this.prisma.vaccination.findMany({
       where: {
-        consultation: { recordId },
+        consultation: { recordId, record: { pet: { client: { clinicId } } } },
         ...(dto.q ? {
           OR: [
             { vaccineName: { contains: dto.q, mode: 'insensitive' } },
@@ -100,8 +100,10 @@ export class MedicalRecordsService {
     });
   }
 
-  async generateQr(recordId: string, webUrl: string): Promise<{ qrCodeUrl: string; publicUuid: string }> {
-    const record = await this.prisma.medicalRecord.findUnique({ where: { id: recordId } });
+  async generateQr(recordId: string, clinicId: string, webUrl: string): Promise<{ qrCodeUrl: string; publicUuid: string }> {
+    const record = await this.prisma.medicalRecord.findFirst({
+      where: { id: recordId, pet: { client: { clinicId } } },
+    });
     if (!record) throw new NotFoundException('Cartilla no encontrada');
 
     // eslint-disable-next-line @typescript-eslint/no-require-imports

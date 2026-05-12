@@ -47,7 +47,7 @@ export class AuthService {
     });
 
     if (clinicUsers.length === 0) {
-      throw new UnauthorizedException('El usuario no está asociado a ninguna clínica activa');
+      throw new UnauthorizedException('Credenciales inválidas');
     }
 
     if (clinicUsers.length === 1) {

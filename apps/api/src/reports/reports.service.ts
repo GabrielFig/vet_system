@@ -34,9 +34,9 @@ async function buildPdfBuffer(docDefinition: object): Promise<Buffer> {
 export class ReportsService {
   constructor(private prisma: PrismaService) {}
 
-  async generateCartillaPdf(petId: string): Promise<Buffer> {
-    const pet = await this.prisma.pet.findUnique({
-      where: { id: petId },
+  async generateCartillaPdf(petId: string, clinicId: string): Promise<Buffer> {
+    const pet = await this.prisma.pet.findFirst({
+      where: { id: petId, client: { clinicId } },
       include: {
         client: { select: { firstName: true, lastName: true } },
         record: {

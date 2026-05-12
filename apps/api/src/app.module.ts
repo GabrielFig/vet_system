@@ -19,7 +19,17 @@ import { AdminModule } from './admin/admin.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env' }),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: '.env',
+      validate: (config: Record<string, unknown>) => {
+        const secret = config['JWT_SECRET'] as string | undefined;
+        if (!secret || secret.length < 32) {
+          throw new Error('JWT_SECRET debe tener al menos 32 caracteres');
+        }
+        return config;
+      },
+    }),
     ThrottlerModule.forRoot([{ ttl: 60000, limit: 100 }]),
     AuthModule,
     AdminModule,

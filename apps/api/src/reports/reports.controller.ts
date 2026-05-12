@@ -11,8 +11,8 @@ export class ReportsController {
   constructor(private service: ReportsService) {}
 
   @Get('pets/:id/record/pdf')
-  async cartillaPdf(@Param('id') id: string, @Res() res: Response) {
-    const buffer = await this.service.generateCartillaPdf(id);
+  async cartillaPdf(@Param('id') id: string, @CurrentUser() user: JwtPayload, @Res() res: Response) {
+    const buffer = await this.service.generateCartillaPdf(id, user.clinicId);
     res.set({
       'Content-Type': 'application/pdf',
       'Content-Disposition': `attachment; filename="cartilla-${id}.pdf"`,

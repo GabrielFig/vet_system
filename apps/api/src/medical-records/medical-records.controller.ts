@@ -10,8 +10,8 @@ export class MedicalRecordsController {
   constructor(private service: MedicalRecordsService) {}
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.service.findOne(id);
+  findOne(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
+    return this.service.findOne(id, user.clinicId);
   }
 
   @Post(':id/consultations')
@@ -24,23 +24,23 @@ export class MedicalRecordsController {
   }
 
   @Get(':id/notes')
-  searchNotes(@Param('id') id: string, @Query() dto: SearchHistoryDto) {
-    return this.service.searchNotes(id, dto);
+  searchNotes(@Param('id') id: string, @Query() dto: SearchHistoryDto, @CurrentUser() user: JwtPayload) {
+    return this.service.searchNotes(id, user.clinicId, dto);
   }
 
   @Get(':id/prescriptions')
-  searchPrescriptions(@Param('id') id: string, @Query() dto: SearchHistoryDto) {
-    return this.service.searchPrescriptions(id, dto);
+  searchPrescriptions(@Param('id') id: string, @Query() dto: SearchHistoryDto, @CurrentUser() user: JwtPayload) {
+    return this.service.searchPrescriptions(id, user.clinicId, dto);
   }
 
   @Get(':id/vaccinations')
-  searchVaccinations(@Param('id') id: string, @Query() dto: SearchHistoryDto) {
-    return this.service.searchVaccinations(id, dto);
+  searchVaccinations(@Param('id') id: string, @Query() dto: SearchHistoryDto, @CurrentUser() user: JwtPayload) {
+    return this.service.searchVaccinations(id, user.clinicId, dto);
   }
 
   @Post(':id/qr')
-  generateQr(@Param('id') id: string) {
+  generateQr(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
     const webUrl = process.env.WEB_URL ?? 'http://localhost:3000';
-    return this.service.generateQr(id, webUrl);
+    return this.service.generateQr(id, user.clinicId, webUrl);
   }
 }

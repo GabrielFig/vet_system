@@ -8,10 +8,8 @@ async function bootstrap() {
 
   app.use(helmet());
 
-  const allowedOrigins = [
-    process.env.WEB_URL,
-    'http://localhost:3000',
-  ].filter(Boolean) as string[];
+  const allowedOrigins = [process.env.WEB_URL].filter(Boolean) as string[];
+  if (process.env.NODE_ENV !== 'production') allowedOrigins.push('http://localhost:3000');
 
   app.enableCors({
     origin: allowedOrigins,
